@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #define LED_MAC_PIN B8
 #include QMK_KEYBOARD_H
+#include "utils/indicators.h"
+#include "utils/game_mode.h"
+#include "utils/socd_cleaner.h"
 
 enum custom_keycodes {
   GAME_MODE = SAFE_RANGE,
@@ -49,3 +52,30 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [2] = {ENCODER_CCW_CW(_______, _______)},  // No encoder on layer 2
 };
 #endif
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    // Process SOCD cleaner for vertical and horizontal directions
+    if (!process_socd_cleaner(keycode, record, &socd_v)) {
+        return false;
+    }
+    if (!process_socd_cleaner(keycode, record, &socd_h)) {
+        return false;
+    }
+
+    if (keycode == GAME_MODE && record->event.pressed) {
+        if (game_mode_enabled) {
+            disable_game_mode();
+            socd_cleaner_enabled = false;
+            rgb_matrix_mode(RGB_MATRIX_SOLID_COLOR);
+            gpio_set_pin_output(B8);
+            gpio_write_pin_high(B8); // Turn OFF LED
+        } else {
+            enable_game_mode();
+            socd_cleaner_enabled = true;
+            gpio_set_pin_output(B8);
+            gpio_write_pin_low(B8); // Turn ON LED
+        }
+        return false;
+    }
+    return true;
+}
