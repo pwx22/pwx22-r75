@@ -1,18 +1,19 @@
 // Copyright 2024 SDK (@sdk66)
 // SPDX-License-Identifier: GPL-2.0-or-later
-#define LED_MAC_PIN B8
 #include QMK_KEYBOARD_H
 #include "utils/indicators.h"
 #include "utils/game_mode.h"
 #include "utils/socd_cleaner.h"
 
+#define LED_WIN_LOCK_PIN B9
+
 enum custom_keycodes {
   GAME_MODE = SAFE_RANGE,
+  AUDIO_VIZ = SAFE_RANGE,
 };
 
 socd_cleaner_t socd_v = {{KC_W, KC_S}, SOCD_CLEANER_LAST};
 socd_cleaner_t socd_h = {{KC_A, KC_D}, SOCD_CLEANER_LAST};
-
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -26,7 +27,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         ),
 
     [1] = LAYOUT( /* FN -> RGB */
-        _______,  KC_MYCM,  KC_WHOM,  KC_MAIL,  KC_CALC,  KC_MSEL,  KC_MSTP,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,   KC_SCRL,  _______,
+        _______,  KC_MYCM,  KC_WHOM,  KC_MAIL,  KC_CALC,  KC_MSEL,  KC_MSTP,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,   KC_SCRL,  QK_LAYER_LOCK,
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,   
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_INS,    RGB_MOD,  KC_BRIU,  
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,             _______,  KC_BRID, 
@@ -35,7 +36,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         ),
 
     [2] = LAYOUT( /* FN -> Bootloader*/
-    QK_BOOTLOADER,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+    QK_BOOTLOADER,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  AUDIO_VIZ,
     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   
     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  
     _______,  _______,  _______,  _______,  _______,  GAME_MODE,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______, 
@@ -54,7 +55,6 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 #endif
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    // Process SOCD cleaner for vertical and horizontal directions
     if (!process_socd_cleaner(keycode, record, &socd_v)) {
         return false;
     }
@@ -62,20 +62,27 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         return false;
     }
 
+    if(game_mode_enabled){
+        if(keycode == KC_LCMD){
+            return false; // Block LGUI key
+        }
+    }
     if (keycode == GAME_MODE && record->event.pressed) {
         if (game_mode_enabled) {
-            disable_game_mode();
             socd_cleaner_enabled = false;
-            rgb_matrix_mode(RGB_MATRIX_SOLID_COLOR);
-            gpio_set_pin_output(B8);
-            gpio_write_pin_high(B8); // Turn OFF LED
+            disable_game_mode();
+            gpio_write_pin_high(LED_WIN_LOCK_PIN);
         } else {
+            socd_cleaner_enabled = true;
             enable_game_mode();
             socd_cleaner_enabled = true;
-            gpio_set_pin_output(B8);
-            gpio_write_pin_low(B8); // Turn ON LED
+            gpio_write_pin_low(LED_WIN_LOCK_PIN);
         }
+        return false;
+    }
+    if (keycode == AUDIO_VIZ && record->event.pressed) {
         return false;
     }
     return true;
 }
+
