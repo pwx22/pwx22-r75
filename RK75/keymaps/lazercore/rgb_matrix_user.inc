@@ -1,7 +1,7 @@
 // Step 1: Declare the custom effect
 RGB_MATRIX_EFFECT(game_mode_effect)
 
-// Step 2: Define the effect logic inside the `RGB_MATRIX_CUSTOM_EFFECT_IMPLS` block
+// gggStep 2: Define the effect logic inside the `RGB_MATRIX_CUSTOM_EFFECT_IMPLS` block
 #ifdef RGB_MATRIX_CUSTOM_EFFECT_IMPLS
 
 // Custom RGB Matrix Game Mode Effect
@@ -11,7 +11,7 @@ static bool game_mode_effect(effect_params_t* params) {
 
   // Set background color to #0432b1 for all keys (light pink)
   for (uint8_t i = led_min; i < led_max; i++) {
-    rgb_matrix_set_color(i, 0x10, 0x10, 0x10);  // Set background for all keys
+    rgb_matrix_set_color(i, 0x34, 0x01, 0x80);  // Set background for all keys
   }
   
   // Set full brightness for WASD, Space, and Ctrl keys
