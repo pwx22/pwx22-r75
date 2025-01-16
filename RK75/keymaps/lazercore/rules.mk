@@ -1,9 +1,9 @@
-OPENRGB_ENABLE = yes
 VIA_ENABLE = yes
 ENCODER_MAP_ENABLE = yes
 LTO_ENABLE = yes
 RGB_MATRIX_CUSTOM_USER = yes
-RGB_MATRIX_SOLID_SPLASH = yes
+CAPS_WORD_ENABLE = yes
+LAYER_LOCK_ENABLE = yes
 SRC += lazercore.c
 SRC += utils/indicators.c
 SRC += utils/game_mode.c

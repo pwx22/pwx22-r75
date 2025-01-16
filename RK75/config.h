@@ -30,12 +30,23 @@
 #define WS2812_SPI_DIVISOR 32
 
 // Set defaults for LED matrix
-#define RGB_MATRIX_DEFAULT_MODE RGB_MATRIX_SOLID_COLOR
+#define RGB_MATRIX_DEFAULT_MODE RGB_MATRIX_SOLID_SPLASH
 #define RGB_MATRIX_DEFAULT_HUE 240
 #define RGB_MATRIX_DEFAULT_SAT 255
-#define RGB_MATRIX_DEFAULT_VAL 150
+#define RGB_MATRIX_DEFAULT_VAL 120
 #define RGB_MATRIX_MAXIMUM_BRIGHTNESS 200
-#define ENABLE_RGB_MATRIX_SPLASH 
+
+// Enable the RGB Matrix Splash feature
+#define ENABLE_RGB_MATRIX_SOLID_SPLASH
+
+// Optional: Set the duration of the splash animation (in milliseconds)
+#define RGB_MATRIX_SOLID_SPLASH_TIME 2000 // Adjust duration as needed
 
 // NKRO Enable Force
 #define FORCE_NKRO
+
+// Enabling CapsWord activation with both shifts
+#define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
+
+// Default debounce time
+#define DEBOUNCE 5
