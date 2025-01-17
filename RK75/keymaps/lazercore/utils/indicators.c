@@ -31,7 +31,10 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
                 rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
             }
         }
-
     }
+    if(layer==3){
+        handle_audio_viz(led_min, led_max);
+    }
+     
     return false;
 }

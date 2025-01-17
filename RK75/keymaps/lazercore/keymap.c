@@ -4,12 +4,13 @@
 #include "utils/indicators.h"
 #include "utils/game_mode.h"
 #include "utils/socd_cleaner.h"
-
+#include "utils/audio_viz.h"
+#include "print.h"
 #define LED_WIN_LOCK_PIN B9
 
 enum custom_keycodes {
   GAME_MODE = SAFE_RANGE,
-  AUDIO_VIZ = SAFE_RANGE,
+  AUDIO_VIZ = SAFE_RANGE+1,
 };
 
 socd_cleaner_t socd_v = {{KC_W, KC_S}, SOCD_CLEANER_LAST};
@@ -44,6 +45,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______,  _______,  _______,                      _______,                                 _______,  _______,            _______,  _______,  _______ 
     ),
 
+    [3] = LAYOUT( /* Audio Visualiser Layer */
+    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  AUDIO_VIZ,
+    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   
+    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  
+    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______, 
+    _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,
+    _______,  _______,  _______,                      _______,                                 _______,  _______,            _______,  _______,  _______ 
+    ),
+
 };
 // clang-format on
 #ifdef ENCODER_MAP_ENABLE
@@ -51,6 +61,7 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [0] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU)},  // Volume control on layer 0
     [1] = {ENCODER_CCW_CW(KC_MRWD, KC_MFFD)},  // Media control on layer 1
     [2] = {ENCODER_CCW_CW(_______, _______)},  // No encoder on layer 2
+    [3] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU)},  // No encoder on layer 2
 };
 #endif
 
@@ -81,6 +92,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         return false;
     }
     if (keycode == AUDIO_VIZ && record->event.pressed) {
+        if(audio_viz_enabled){
+            disable_audio_viz();
+        } else {
+            enable_audio_viz();
+        }
         return false;
     }
     return true;
