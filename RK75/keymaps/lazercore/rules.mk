@@ -12,3 +12,4 @@ SRC += utils/socd_cleaner.c
 SRC += utils/brightness.c
 SRC += utils/audio_viz.c
 SRC += g_led_config.c
+SRC += utils/sentence_case.c

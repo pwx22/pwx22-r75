@@ -4,6 +4,11 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
     for (uint8_t i = led_min; i < led_max; i++) {
         hsv_t global_hsv = rgb_matrix_get_hsv();
+        if (layer == 0) {
+            if (is_sentence_case_on() && i ==50) {
+                rgb_matrix_set_color(i, 0xFF, 0x00, 0x00);
+            }
+        }
         if (layer == 1) {
             if (i == 6) {
                 rgb_matrix_set_color(i, 0xFF, 0xFF, 0xFF);
@@ -13,6 +18,8 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
                 rgb_matrix_set_color(i, 0xFB, 0x98, 0xFF);
             } else if (i == 64) {  // Key 64: Red
                 rgb_matrix_set_color(i, 0xFF, 0x00, 0x12);
+            } else if (i == 50) {
+                rgb_matrix_set_color(i, 0xFF, 0x00, 0x00);
             } else{
                 hsv_t dimmed_hsv = global_hsv;
                 dimmed_hsv.v = dimmed_hsv.v / 2;
