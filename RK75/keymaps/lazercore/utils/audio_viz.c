@@ -72,15 +72,14 @@ void handle_audio_viz(uint8_t led_min, uint8_t led_max) {
         // Set LEDs for each column in the band
         for (uint8_t col = col_start; col <= col_end; col++) {
             // Light up LEDs for the column
-            for (uint8_t row = 0; row < leds_to_light; row++) {
-                // Use QMK's RGB matrix API to turn on the LED
-                uint8_t led_index = g_led_config.matrix_co[row][col];
-                rgb_matrix_set_color(led_index, 255, 0, 0); // Example: Set to red
+            for (uint8_t row = 5; row >= 6 - leds_to_light; row--) { 
+                uint8_t led_index = g_led_config.matrix[row][col];
+                rgb_matrix_set_color(led_index, 255, 0, 0);
             }
 
             // Turn off the remaining LEDs in the column, if any
-            for (uint8_t row = leds_to_light; row < 6; row++) {
-                uint8_t led_index = g_led_config.matrix_co[row][col];
+            for (uint8_t row = 6 - leds_to_light - 1; row < 6; row--) {
+                uint8_t led_index = g_led_config.matrix[row][col];
                 rgb_matrix_set_color(led_index, 0, 0, 0); // Turn off
             }
         }
