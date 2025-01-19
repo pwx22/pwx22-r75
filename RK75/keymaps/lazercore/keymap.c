@@ -61,9 +61,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #ifdef ENCODER_MAP_ENABLE
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [0] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU)},  // Volume control on layer 0
-    [1] = {ENCODER_CCW_CW(KC_MRWD, KC_MFFD)},  // Media control on layer 1
-    [2] = {ENCODER_CCW_CW(_______, _______)},  // No encoder on layer 2
-    [3] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU)},  // No encoder on layer 2
+    [1] = {ENCODER_CCW_CW(KC_BRID, KC_BRIU)},  // Screen brightness on layer 1
+    [2] = {ENCODER_CCW_CW(KC_MFFD, KC_MRWD)},  // Media fast forward/rewind on layer 2
+    [3] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU)},  // Volume control on layer 3
 };
 #endif
 
