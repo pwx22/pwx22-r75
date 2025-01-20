@@ -9,7 +9,7 @@ uint8_t audio_viz_data[32];
 bool via_command_kb(uint8_t *data, uint8_t length) {
     // Copy Audio Data when on Layer3 [audio visualiser layer]
     if (get_highest_layer(layer_state | default_layer_state) == 3) {
-        memcpy(audio_viz_data, data, length); // Copy data to audio_viz_data
+        memcpy(audio_viz_data, data, length);
         matrix_scan();
         return true;
     } else {
@@ -17,7 +17,7 @@ bool via_command_kb(uint8_t *data, uint8_t length) {
     }
 }
 #   if !defined(VIA_ENABLE)
-// Wak override for raw_hid_receive_user, allowing keymap override
+// Weak override for raw_hid_receive_user, allowing keymap override
 __attribute__((weak)) bool raw_hid_receive_user(uint8_t *data, uint8_t length) {
     return false;
 }
@@ -73,13 +73,20 @@ void handle_audio_viz(uint8_t led_min, uint8_t led_max) {
         for (uint8_t col = col_start; col <= col_end; col++) {
             // Light up LEDs for the column
             for (uint8_t row = 5; row >= 6 - leds_to_light; row--) { 
-                uint8_t led_index = g_led_config.matrix[row][col];
-                rgb_matrix_set_color(led_index, 255, 0, 0);
-            }
-
+                uint8_t led_index = g_led_config.matrix_co[row][col];
+                if(row==5 || row==4){
+                    rgb_matrix_set_color(led_index, 0, 0, 255); // Blue
+                } else if(row==3){
+                    rgb_matrix_set_color(led_index, 0, 255, 0); // Green
+                } else if(row==2){
+                    rgb_matrix_set_color(led_index, 255, 255, 0); // Yellow
+                } else if(row==1){
+                    rgb_matrix_set_color(led_index, 255, 69, 0); // Orange-Red
+                }
+            }  
             // Turn off the remaining LEDs in the column, if any
             for (uint8_t row = 6 - leds_to_light - 1; row < 6; row--) {
-                uint8_t led_index = g_led_config.matrix[row][col];
+                uint8_t led_index = g_led_config.matrix_co[row][col];
                 rgb_matrix_set_color(led_index, 0, 0, 0); // Turn off
             }
         }
