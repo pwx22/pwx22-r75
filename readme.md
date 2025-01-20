@@ -1,5 +1,4 @@
 ![lazercore1](https://github.com/user-attachments/assets/e7b6cfb6-69a9-4dbc-b367-30854e5d35ae)
-## ⚠️ Disclaimer
 > [!CAUTION]
 > This is a custom firmware that could break your keyboard.
 >
@@ -8,11 +7,13 @@
 ## Features  
 - **VIA Enabled**: Easily remap keys, configure layers, and customize RGB lighting using the [Via configurator](https://usevia.app/).  
 - **CapsWord**: Press `Left Shift + Right Shift` to type a word in all caps.  
-- **Sentence Case**: Press `Fn + Caps Lock` to toggle sentence case mode. Automatically capitalizes the first letter of a sentence.  
+- **Sentence Case**: Press `Fn + Caps Lock` to toggle sentence case mode. Automatically capitalizes the first letter of a sentence.
+- **Autocorrect** : Press `Fn + F3` to toggle Autocorrect. Corrects common typos from a Dictionary (Created by [@https://github.com/gargum] @gargum)
 - **Game Mode**: Press `Fn + Right Shift + G` to toggle game mode.
     - **SOCD Filtering**: It is a feature that prioritizes the latest input between two selected keys without the need to release the previous one, allowing for faster directional changes.
     - Custom RGB Matrix with highlighted WASD.
     - RGB Mode remains adjustable in Game Mode.
+    - Blocks Windows Key (LGUI)
 - **Audio Visualizer Mode**(layer 3):
   - Activate with `Fn + Right Shift + Volume Knob`.  
   - Real-time reactive audio visualizer powered by [Lazersync](https://github.com/pk-vishnu/lazersync).  

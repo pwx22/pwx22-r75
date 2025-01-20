@@ -5,6 +5,7 @@ RGB_MATRIX_CUSTOM_USER = yes
 CAPS_WORD_ENABLE = yes
 LAYER_LOCK_ENABLE = yes
 RAW_ENABLE = yes
+AUTOCORRECT_ENABLE = yes
 SRC += lazercore.c
 SRC += utils/indicators.c
 SRC += utils/game_mode.c

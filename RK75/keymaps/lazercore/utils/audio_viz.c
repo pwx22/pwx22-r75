@@ -1,4 +1,5 @@
-#include "audio_viz.h"
+#include "quantum.h"
+#include "rgb_matrix.h"
 #include "via.h"
 #include "print.h"
 
@@ -9,7 +10,7 @@ uint8_t audio_viz_data[32];
 bool via_command_kb(uint8_t *data, uint8_t length) {
     // Copy Audio Data when on Layer3 [audio visualiser layer]
     if (get_highest_layer(layer_state | default_layer_state) == 3) {
-        memcpy(audio_viz_data, data, length); // Copy data to audio_viz_data
+        memcpy(audio_viz_data, data, length);
         matrix_scan();
         return true;
     } else {
@@ -17,7 +18,7 @@ bool via_command_kb(uint8_t *data, uint8_t length) {
     }
 }
 #   if !defined(VIA_ENABLE)
-// Wak override for raw_hid_receive_user, allowing keymap override
+// Weak override for raw_hid_receive_user, allowing keymap override
 __attribute__((weak)) bool raw_hid_receive_user(uint8_t *data, uint8_t length) {
     return false;
 }
@@ -63,23 +64,33 @@ void handle_audio_viz(uint8_t led_min, uint8_t led_max) {
     };
 
     for (uint8_t band = 0; band < 6; band++) {
-        uint8_t leds_to_light = audio_viz_data[band]; // Number of LEDs to light in this band
+        uint8_t leds_to_light = audio_viz_data[band];
 
         // Get column range for this band
         uint8_t col_start = col_groups[band][0];
         uint8_t col_end = col_groups[band][1];
 
-        // Set LEDs for each column in the band
+        // Light up LEDs for each column in the band
         for (uint8_t col = col_start; col <= col_end; col++) {
-            // Light up LEDs for the column
             for (uint8_t row = 5; row >= 6 - leds_to_light; row--) { 
-                uint8_t led_index = g_led_config.matrix[row][col];
-                rgb_matrix_set_color(led_index, 255, 0, 0);
-            }
+                uint8_t led_index = g_led_config.matrix_co[row][col];
+                if (row == 5) {
+                    rgb_matrix_set_color(led_index, 128, 0, 128); // Deep Purple
+                } else if (row == 4) {
+                    rgb_matrix_set_color(led_index, 0, 0, 255); // Electric Blue
+                } else if (row == 3) {
+                    rgb_matrix_set_color(led_index, 255, 0, 255); // Magenta
+                } else if (row == 2) {
+                    rgb_matrix_set_color(led_index, 220, 20, 60); // Crimson
+                } else if (row == 1) {
+                    rgb_matrix_set_color(led_index, 153, 50, 204); // Electric Purple
+                }
 
-            // Turn off the remaining LEDs in the column, if any
+
+            }
+            // Turn off remaining LEDs
             for (uint8_t row = 6 - leds_to_light - 1; row < 6; row--) {
-                uint8_t led_index = g_led_config.matrix[row][col];
+                uint8_t led_index = g_led_config.matrix_co[row][col];
                 rgb_matrix_set_color(led_index, 0, 0, 0); // Turn off
             }
         }
