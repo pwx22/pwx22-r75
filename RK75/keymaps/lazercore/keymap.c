@@ -6,13 +6,13 @@
 #include "utils/socd_cleaner.h"
 #include "utils/audio_viz.h"
 #include "utils/sentence_case.h"
-#include "print.h"
-#define LED_WIN_LOCK_PIN B9
+#include "utils/type_alchemy.h"
 
 enum custom_keycodes {
   GAME_MODE = SAFE_RANGE,
   AUDIO_VIZ = SAFE_RANGE+1,
   TOGG_SEN_CASE = SAFE_RANGE+2,
+  TOGG_ALCH_TYPE = SAFE_RANGE+3,
 };
 
 socd_cleaner_t socd_v = {{KC_W, KC_S}, SOCD_CLEANER_LAST};
@@ -30,8 +30,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         ),
 
     [1] = LAYOUT( /* FN -> RGB */
-        _______,  KC_MYCM,  KC_WHOM,  AC_TOGG ,  KC_CALC,  KC_MSEL,  KC_MSTP,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,   KC_SCRL,  QK_LAYER_LOCK,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,   
+        _______,  TOGG_ALCH_TYPE,  UC_NEXT,  AC_TOGG ,  _______,  _______,  _______,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,   KC_SCRL,  QK_LAYER_LOCK,
+        _______,  _______ ,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,   
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_INS,    RGB_MOD,  KC_BRIU,  
         TOGG_SEN_CASE,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,             _______,  KC_BRID, 
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  MO(2),               RGB_VAI,
@@ -68,10 +68,10 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 #endif
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (!process_socd_cleaner(keycode, record, &socd_v)) {
-        return false;
+    if (!process_type_alchemy(keycode, (char)(keycode - KC_A + 'a'), record->event.pressed)) {
+        return false; // Skip further processing if type_alchemy handled the event
     }
-    if (!process_socd_cleaner(keycode, record, &socd_h)) {
+    if (!process_socd_cleaner(keycode, record, &socd_v)) {
         return false;
     }
     if (!process_sentence_case(keycode, record)) { return false; }
@@ -103,6 +103,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
     if (keycode == TOGG_SEN_CASE && record->event.pressed) {
         sentence_case_toggle();
+        return false;
+    }
+
+    if (keycode == TOGG_ALCH_TYPE && record->event.pressed){
+        toggle_type_alchemy();
         return false;
     }
     return true;

@@ -5,27 +5,59 @@
 > 🛑 **Use at your own risk!** 🛑
 
 ## Features  
-- **VIA Enabled**: Easily remap keys, configure layers, and customize RGB lighting using the [Via configurator](https://usevia.app/).  
-- **CapsWord**: Press `Left Shift + Right Shift` to type a word in all caps.  
-- **Sentence Case**: Press `Fn + Caps Lock` to toggle sentence case mode. Automatically capitalizes the first letter of a sentence.
-- **Autocorrect** : Press `Fn + F3` to toggle Autocorrect. Corrects common typos from a Dictionary (Created by [@https://github.com/gargum] @gargum)
-- **Game Mode**: Press `Fn + Right Shift + G` to toggle game mode.
-    - **SOCD Filtering**: It is a feature that prioritizes the latest input between two selected keys without the need to release the previous one, allowing for faster directional changes.
-    - Custom RGB Matrix with highlighted WASD.
-    - RGB Mode remains adjustable in Game Mode.
-    - Blocks Windows Key (LGUI)
-- **Audio Visualizer Mode**(layer 3):
-  - Activate with `Fn + Right Shift + Volume Knob`.  
-  - Real-time reactive audio visualizer powered by [Lazersync](https://github.com/pk-vishnu/lazersync).  
-- **Light Indicators**: Visual indicators for active layers.
-- **Knob controls**: Volume control on layer 0, Screen brightness on layer 1, Media FastForward/Rewind on layer 2.
-- **DFU Mode**: Enter bootloader mode with `Fn + Shift + Esc` for flashing firmware.
-- **Clear EEPROM**: Press `Fn + Space` to clear EEPROM.
-#### RGB Controls  
-- **Brightness**: `Fn + Up/Down Arrows`.  
-- **Effect Speed**: `Fn + Left/Right Arrows`.  
-- **RGB Mode**: `Fn + \` (Back Slash).
-- Further Customization: Use the [Via Configurator](https://usevia.app/).
+
+### VIA Enabled  
+Easily remap keys, configure layers, and customize RGB lighting using the [Via Configurator](https://usevia.app/).  
+
+### CapsWord  
+Type a word in all caps by pressing `Left Shift + Right Shift`.  
+
+### Sentence Case  
+Toggle sentence case mode with `Fn + Caps Lock`. Automatically capitalizes the first letter of each sentence.  
+
+### Autocorrect  
+Toggle Autocorrect with `Fn + F3`.  
+- Corrects common typos using a dictionary created by [@gargum](https://github.com/gargum).  
+
+### Game Mode  
+Activate Game Mode with `Fn + Right Shift + G`. Features include:  
+- **SOCD Filtering**: Prioritizes the latest input between two conflicting keys for faster directional changes.  
+- **Custom RGB Matrix**: Highlights WASD keys with adjustable RGB modes.  
+- **Windows Key Lock**: Blocks the `LGUI` (Windows) key to prevent interruptions.  
+
+### Audio Visualizer Mode (Layer 3)  
+Activate with `Fn + Right Shift + Volume Knob`.  
+- Real-time, reactive audio visualization powered by [Lazersync](https://github.com/pk-vishnu/lazersync).  
+
+### Type Alchemy  
+Toggle Type Alchemy with `Fn + F1`.  
+- Automatically convert words into symbols using a customizable map. For example, typing "infinity" converts to `∞`.  
+- Switch between Unicode modes for Windows ([WinCompose](https://github.com/samhocevar/wincompose) required), Linux, and macOS with `Fn + F2`.  
+- Use the public API in `type_alchemy.h` to expand functionality.  
+
+### Light Indicators  
+Visual indicators show the currently active layer and available function keys.  
+
+### Knob Controls  
+- **Layer 0**: Volume control  
+- **Layer 1**: Screen brightness  
+- **Layer 2**: Media fast-forward/rewind  
+
+### DFU Mode  
+Enter bootloader mode for flashing firmware by pressing `Fn + Shift + Esc`.  
+
+### Clear EEPROM  
+Clear the keyboard's EEPROM memory with `Fn + Space`.  
+
+---
+
+## RGB Controls  
+
+- **Brightness**: Adjust with `Fn + Up/Down Arrows`.  
+- **Effect Speed**: Adjust with `Fn + Left/Right Arrows`.  
+- **RGB Mode**: Cycle modes with `Fn + \` (Backslash).  
+- **Further Customization**: Use the [Via Configurator](https://usevia.app/).  
+
 ---
 
 ## Getting Started  
