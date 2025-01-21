@@ -14,7 +14,7 @@
         "command": false,
         "encoder": true,
         "extrakey": true,
-        "mousekey": true,
+        "mousekey": false,
         "nkro": true,
         "rgb_matrix": true
     },
