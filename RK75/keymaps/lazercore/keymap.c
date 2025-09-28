@@ -92,7 +92,7 @@ static uint32_t eeprom_deferred_callback(uint32_t trigger_time, void *context) {
     (void)trigger_time;
     (void)context;
     eeconfig_init();
-    keymap_config.raw = eeconfig_read_keymap();
+    eeconfig_read_keymap(&keymap_config);
     sentence_case_off();
     indicators_set_sentence_case(false);
     set_winlock(false);
