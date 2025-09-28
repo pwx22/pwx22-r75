@@ -91,9 +91,16 @@ static uint32_t dfu_deferred_callback(uint32_t trigger_time, void *context) {
 static uint32_t eeprom_deferred_callback(uint32_t trigger_time, void *context) {
     (void)trigger_time;
     (void)context;
-    eeconfig_init_kb();
-    eeconfig_init_user();
-    reset_keyboard();
+    eeconfig_init();
+    keymap_config.raw = eeconfig_read_keymap();
+    sentence_case_off();
+    indicators_set_sentence_case(false);
+    set_winlock(false);
+    set_nkro_state(keymap_config.nkro, false);
+    apply_socd_mode(SOCD_MODE_LAST, false);
+    layer_move(0);
+    socd_cleaner_enabled = true;
+    eeprom_token = INVALID_DEFERRED_TOKEN;
     return 0;
 }
 

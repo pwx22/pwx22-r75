@@ -94,12 +94,17 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
 
     uint8_t layer = get_highest_layer(layer_state | default_layer_state);
-    bool layer_is_fn = (layer == 1 || layer == 4);
+    bool layer_is_fn = (layer == 1);
+    bool layer_is_socd = (layer == 2);
+    bool layer_is_system = (layer == 3);
 
-    if (layer_is_fn) {
+    if (layer_is_fn || layer_is_socd || layer_is_system) {
         for (uint8_t i = led_min; i < led_max; i++) {
             rgb_matrix_set_color(i, 0, 0, 0);
         }
+    }
+
+    if (layer_is_fn) {
         set_color_if_visible(LED_INDEX_ENTER, led_min, led_max, 0x4D, 0xA6, 0xFF);
         set_color_if_visible(LED_INDEX_RSFT, led_min, led_max, 0x4D, 0xA6, 0xFF);
         const uint8_t caps_color_g = sentence_case_active ? 0xFF : 0x00;
@@ -112,7 +117,7 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         const uint8_t win_b = win_active ? 0x66 : 0x00;
         set_color_if_visible(LED_INDEX_WIN, led_min, led_max, win_r, win_g, win_b);
     } else {
-        if (layer == 0) {
+        if (layer == 0 || layer == 4) {
             if (sentence_case_active) {
                 set_color_if_visible(LED_INDEX_CAPS, led_min, led_max, 0x00, 0xFF, 0x66);
             }
@@ -121,12 +126,12 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
             }
         }
 
-        if (layer == 2) {
+        if (layer_is_socd) {
             set_color_if_visible(LED_INDEX_S, led_min, led_max, 0x9B, 0x59, 0xFF);
             set_color_if_visible(LED_INDEX_N, led_min, led_max, 0xFF, 0xA5, 0x00);
         }
 
-        if (layer == 3) {
+        if (layer_is_system) {
             set_color_if_visible(LED_INDEX_ESC, led_min, led_max, 0xFF, 0x00, 0x00);
             set_color_if_visible(LED_INDEX_E, led_min, led_max, 0xFF, 0x00, 0x00);
         }
