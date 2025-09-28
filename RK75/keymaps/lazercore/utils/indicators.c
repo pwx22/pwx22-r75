@@ -33,6 +33,13 @@ static bool layer2_active = false;
 static bool layer3_active = false;
 static uint8_t socd_mode_state = 0;
 
+#define MAX_EXCLUDED_LEDS 12
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+static const uint8_t layer1_function_leds[] = {LED_WIN, LED_CAPS, LED_RSFT, LED_ENTER};
+static const uint8_t layer2_function_leds[] = {LED_RSFT, LED_ENTER, LED_KEY_N, LED_KEY_S};
+static const uint8_t layer3_function_leds[] = {LED_ENTER, LED_ESC, LED_KEY_E};
+
 static uint16_t nkro_flash_timer = 0;
 static uint8_t nkro_flash_type = 0;
 static uint16_t socd_flash_timer = 0;
@@ -69,6 +76,48 @@ static inline void set_indicator_color_scaled(uint8_t index, const rgb_t *color,
                          scale_channel(color->r, brightness),
                          scale_channel(color->g, brightness),
                          scale_channel(color->b, brightness));
+}
+
+static inline bool contains_led(const uint8_t *leds, uint8_t count, uint8_t value) {
+    for (uint8_t i = 0; i < count; ++i) {
+        if (leds[i] == value) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static inline void add_excluded_led(uint8_t *leds, uint8_t *count, uint8_t value) {
+    if (*count >= MAX_EXCLUDED_LEDS) {
+        return;
+    }
+    if (contains_led(leds, *count, value)) {
+        return;
+    }
+    leds[*count] = value;
+    (*count)++;
+}
+
+static void apply_layer_dimming(float brightness, const uint8_t *excluded, uint8_t excluded_count, uint8_t led_min, uint8_t led_max) {
+    if (brightness >= 1.0f) {
+        return;
+    }
+    for (uint8_t index = led_min; index < led_max; ++index) {
+        if (contains_led(excluded, excluded_count, index)) {
+            continue;
+        }
+        uint8_t r = 0;
+        uint8_t g = 0;
+        uint8_t b = 0;
+        rgb_matrix_get_color(index, &r, &g, &b);
+        if (r == 0 && g == 0 && b == 0) {
+            continue;
+        }
+        rgb_matrix_set_color(index,
+                             scale_channel(r, brightness),
+                             scale_channel(g, brightness),
+                             scale_channel(b, brightness));
+    }
 }
 
 void indicators_set_fn(bool pressed) {
@@ -131,13 +180,36 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         return false;
     }
 
+    float dim_factor = 1.0f;
+    uint8_t excluded_leds[MAX_EXCLUDED_LEDS] = {0};
+    uint8_t excluded_count = 0;
+
+    if (fn_held) {
+        dim_factor = 0.4f;
+        for (uint8_t i = 0; i < ARRAY_SIZE(layer1_function_leds); ++i) {
+            add_excluded_led(excluded_leds, &excluded_count, layer1_function_leds[i]);
+        }
+    }
+    if (layer2_active) {
+        dim_factor = 0.2f;
+        for (uint8_t i = 0; i < ARRAY_SIZE(layer2_function_leds); ++i) {
+            add_excluded_led(excluded_leds, &excluded_count, layer2_function_leds[i]);
+        }
+    }
+    if (layer3_active) {
+        dim_factor = 0.0f;
+        for (uint8_t i = 0; i < ARRAY_SIZE(layer3_function_leds); ++i) {
+            add_excluded_led(excluded_leds, &excluded_count, layer3_function_leds[i]);
+        }
+    }
+
+    if (dim_factor < 1.0f) {
+        apply_layer_dimming(dim_factor, excluded_leds, excluded_count, led_min, led_max);
+    }
+
     float accent_brightness = 1.0f;
     if (layer3_active) {
         accent_brightness = 0.0f;
-    } else if (layer2_active) {
-        accent_brightness = 0.4f;
-    } else if (fn_held) {
-        accent_brightness = 0.6f;
     }
 
     if (!fn_held) {
