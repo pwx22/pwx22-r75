@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include QMK_KEYBOARD_H
 #include "rgb_matrix.h"
-#include "utils/type_alchemy.h"
 #define LED_ENABLE_PIN A5
 
 void keyboard_pre_init_kb(void) {
@@ -18,12 +17,8 @@ void keyboard_pre_init_kb(void) {
     keyboard_pre_init_user();
 }
 
-void keyboard_pre_init_user(){
-    debug_enable=true;
-    /*Eg: Add custom mappings for Type Alchemy */
-    init_type_alchemy();
-    add_word_symbol_mapping("laugh", "😂"); // Dynamically add new mappings
-    add_word_symbol_mapping("sad", "😢");
+void keyboard_pre_init_user() {
+    debug_enable = true;
 }
 
 void suspend_power_down_kb(void) {
