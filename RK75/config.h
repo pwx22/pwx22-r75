@@ -39,5 +39,10 @@
 // Enabling CapsWord activation with both shifts
 #define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
 
+#ifdef NKRO_DEFAULT_ON
+#    undef NKRO_DEFAULT_ON
+#endif
+#define NKRO_DEFAULT_ON true
+
 // Default debounce time
 #define DEBOUNCE 5
