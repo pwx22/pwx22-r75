@@ -68,6 +68,27 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 #endif
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (record->event.pressed) {
+        lazercore_rgb_note_frow_press(record->event.key.row, record->event.key.col);
+
+        switch (keycode) {
+            case QK_NKRO_TOGGLE:
+            case QK_NKRO_ON:
+            case QK_NKRO_OFF:
+                lazercore_rgb_flash_nkro();
+                break;
+            case GAME_MODE:
+                lazercore_rgb_flash_socd();
+                break;
+            case QK_BOOTLOADER:
+                lazercore_rgb_flash_dfu();
+                break;
+            case EE_CLR:
+                lazercore_rgb_flash_eeprom();
+                break;
+        }
+    }
+
     if (!process_type_alchemy(keycode, (char)(keycode - KC_A + 'a'), record->event.pressed)) {
         return false; // Skip further processing if type_alchemy handled the event
     }

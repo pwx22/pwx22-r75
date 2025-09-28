@@ -11,7 +11,7 @@ void enable_game_mode(void) {
     layer_clear();
     layer_on(0);
     previous_rgb_matrix_mode = rgb_matrix_get_mode();
-    rgb_matrix_mode(RGB_MATRIX_CUSTOM_game_mode_effect);
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
 }
 
 void disable_game_mode(void) {
