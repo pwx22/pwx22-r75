@@ -51,13 +51,13 @@ static void update_socd_resolution(uint8_t mode) {
 
 static void toggle_winlock(void) {
     keymap_config.no_gui = !keymap_config.no_gui;
-    eeconfig_update_keymap(keymap_config.raw);
+    eeconfig_update_keymap(&keymap_config);
     clear_keyboard();
 }
 
 static void toggle_nkro(void) {
     keymap_config.nkro = !keymap_config.nkro;
-    eeconfig_update_keymap(keymap_config.raw);
+    eeconfig_update_keymap(&keymap_config);
     clear_keyboard();
     indicators_trigger_nkro_feedback(keymap_config.nkro);
 }
