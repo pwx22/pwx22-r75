@@ -10,6 +10,9 @@
 #define LED_WIN_LOCK_PIN B9
 #define LED_MAC_PIN B8
 
+// Enable NKRO by default (replaces deprecated force_nkro JSON option)
+#define NKRO_DEFAULT_ON
+
 /* SPI */
 #define SPI_DRIVER SPIDQ
 #define SPI_SCK_PIN B3
