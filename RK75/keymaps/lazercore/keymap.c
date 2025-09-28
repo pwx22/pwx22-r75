@@ -11,8 +11,10 @@
 #include "utils/socd_cleaner.h"
 
 void clear_keyboard_but_mods(void);
+#if defined(NKRO_ENABLE)
 void keyboard_nkro_enable(void);
 void keyboard_nkro_disable(void);
+#endif
 
 enum custom_keycodes {
     SENT_CASE_TG = SAFE_RANGE,
@@ -44,11 +46,13 @@ static void set_winlock(bool enabled) {
 
 static void set_nkro_state(bool enabled, bool trigger_feedback) {
     nkro_enabled = enabled;
+#if defined(NKRO_ENABLE)
     if (enabled) {
         keyboard_nkro_enable();
     } else {
         keyboard_nkro_disable();
     }
+#endif
     keymap_config.nkro = enabled;
     eeconfig_update_keymap(&keymap_config);
     indicators_set_nkro(enabled, trigger_feedback);
@@ -151,7 +155,7 @@ void keyboard_post_init_user(void) {
     sentence_case_off();
     indicators_set_sentence_case(false);
     set_winlock(false);
-    set_nkro_state(false, false);
+    set_nkro_state(keymap_config.nkro, false);
     apply_socd_mode(SOCD_MODE_LAST, false);
     socd_cleaner_enabled = true;
 }
