@@ -12,8 +12,12 @@
 
 void clear_keyboard_but_mods(void);
 #if defined(NKRO_ENABLE)
-void keyboard_nkro_enable(void);
-void keyboard_nkro_disable(void);
+// Provide weak fallbacks so builds without the upstream NKRO helpers still link.
+__attribute__((weak)) void keyboard_nkro_enable(void) {
+}
+
+__attribute__((weak)) void keyboard_nkro_disable(void) {
+}
 #endif
 
 enum custom_keycodes {
