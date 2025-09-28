@@ -16,15 +16,17 @@ enum layer_names {
 };
 
 enum custom_keycodes {
-    RSFT_L2 = SAFE_RANGE,
-    RENTER_L3,
+    WINLOCK_TG = SAFE_RANGE,
+    SENTENCE_CASE_TG,
+    SOCD_TOG,
+    NKRO_TOG,
+    DFU_MODE,
+    EEPROM_CLEAR,
 };
 
 static bool fn_held = false;
-static bool right_shift_pressed = false;
-static bool right_enter_pressed = false;
-static bool shift_layer_held = false;
-static bool enter_layer_held = false;
+static bool shift_layer_active = false;
+static bool enter_layer_active = false;
 static bool dfu_pending = false;
 static uint16_t dfu_request_timer = 0;
 static uint8_t socd_mode = 0;  // 0: Neutralize, 1: Last wins, 2: First wins
@@ -89,6 +91,7 @@ static void clear_eeprom_with_feedback(void) {
 void keyboard_post_init_user(void) {
     update_socd_resolution(socd_mode);
     sentence_case_off();
+    layer_state_set_user(layer_state);
 }
 
 // clang-format off
@@ -101,71 +104,47 @@ KC_EQL,   KC_BSPC,  KC_DEL,
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,
 KC_RBRC,  KC_BSLS,  KC_PGUP,
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,
-          RENTER_L3,   KC_PGDN,
-        KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  RSFT_L2,
+          KC_ENT,   KC_PGDN,
+        KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,
           KC_UP,
         KC_LCTL,  KC_LGUI,  KC_LALT,                      KC_SPC,                                 KC_RALT,  MO(_FN),
 KC_LEFT,  KC_DOWN,  KC_RGHT
         ),
 
-    [_FN] = LAYOUT(
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,  _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,   _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,   _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-          _______,   _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-          _______,
-        _______,  _______,  _______,                      _______,                                 _______,  _______,
-_______,  _______,  _______
+    [_FN] = LAYOUT( 
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  
+        SENTENCE_CASE_TG,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            MO(_ENTER),  _______, 
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  MO(_SHIFT),            _______,
+        _______,  WINLOCK_TG,  _______,                      _______,                                 _______,  _______,            _______,  _______,  _______ 
         ),
 
-    [_SHIFT] = LAYOUT(
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,  _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,   _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,   _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-          _______,   _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-          _______,
-        _______,  _______,  _______,                      _______,                                 _______,  _______,
-_______,  _______,  _______
+    [_SHIFT] = LAYOUT( 
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  
+        _______,  _______,  SOCD_TOG,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______, 
+        _______,  _______,  _______,  _______,  _______,  _______,  NKRO_TOG,  _______,  _______,  _______,  _______,  _______,            _______,
+        _______,  _______,  _______,                      _______,                                 _______,  _______,            _______,  _______,  _______ 
         ),
 
-    [_ENTER] = LAYOUT(
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,  _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,   _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,   _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-          _______,   _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-          _______,
-        _______,  _______,  _______,                      _______,                                 _______,  _______,
-_______,  _______,  _______
+    [_ENTER] = LAYOUT( 
+        DFU_MODE,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   
+        _______,  _______,  _______,  EEPROM_CLEAR,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______, 
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,
+        _______,  _______,  _______,                      _______,                                 _______,  _______,            _______,  _______,  _______ 
         ),
 
-    [_EMPTY] = LAYOUT(
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,  _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,   _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,   _______,  _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-          _______,   _______,
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-          _______,
-        _______,  _______,  _______,                      _______,                                 _______,  _______,
-_______,  _______,  _______
+    [_EMPTY] = LAYOUT( 
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______, 
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,
+        _______,  _______,  _______,                      _______,                                 _______,  _______,            _______,  _______,  _______ 
         ),
 };
 // clang-format on
@@ -180,111 +159,50 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 };
 #endif
 
-static void set_shift_layer(bool active) {
-    if (shift_layer_held == active) {
-        return;
-    }
-    shift_layer_held = active;
-    indicators_set_layer2(active);
-    if (active) {
-        layer_on(_SHIFT);
-    } else {
-        layer_off(_SHIFT);
-    }
-}
+layer_state_t layer_state_set_user(layer_state_t state) {
+    fn_held             = layer_state_cmp(state, 1UL << _FN);
+    shift_layer_active  = layer_state_cmp(state, 1UL << _SHIFT);
+    enter_layer_active  = layer_state_cmp(state, 1UL << _ENTER);
 
-static void set_enter_layer(bool active) {
-    if (enter_layer_held == active) {
-        return;
-    }
-    enter_layer_held = active;
-    indicators_set_layer3(active);
-    if (active) {
-        layer_on(_ENTER);
-    } else {
-        layer_off(_ENTER);
-    }
+    indicators_set_fn(fn_held);
+    indicators_set_layer2(shift_layer_active);
+    indicators_set_layer3(enter_layer_active);
+
+    return state;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (keycode == MO(_FN)) {
-        fn_held = record->event.pressed;
-        indicators_set_fn(fn_held);
-        if (fn_held) {
-            if (right_shift_pressed) {
-                set_shift_layer(true);
-            }
-            if (right_enter_pressed) {
-                set_enter_layer(true);
-            }
-        } else {
-            if (shift_layer_held) {
-                set_shift_layer(false);
-            }
-            if (enter_layer_held) {
-                set_enter_layer(false);
-            }
-        }
-    }
-
     switch (keycode) {
-        case RSFT_L2:
+        case WINLOCK_TG:
             if (record->event.pressed) {
-                right_shift_pressed = true;
-                register_code(KC_RSFT);
-                if (fn_held) {
-                    set_shift_layer(true);
-                }
-            } else {
-                right_shift_pressed = false;
-                unregister_code(KC_RSFT);
-                if (shift_layer_held) {
-                    set_shift_layer(false);
-                }
+                toggle_winlock();
             }
             return false;
-        case RENTER_L3:
+        case SENTENCE_CASE_TG:
             if (record->event.pressed) {
-                right_enter_pressed = true;
-                register_code(KC_ENT);
-                if (fn_held) {
-                    set_enter_layer(true);
-                }
-            } else {
-                right_enter_pressed = false;
-                unregister_code(KC_ENT);
-                if (enter_layer_held) {
-                    set_enter_layer(false);
-                }
+                sentence_case_toggle();
             }
             return false;
-    }
-
-    if (record->event.pressed) {
-        if (fn_held && keycode == KC_LGUI) {
-            toggle_winlock();
+        case SOCD_TOG:
+            if (record->event.pressed) {
+                cycle_socd_mode();
+            }
             return false;
-        }
-        if (fn_held && keycode == KC_CAPS) {
-            sentence_case_toggle();
+        case NKRO_TOG:
+            if (record->event.pressed) {
+                toggle_nkro();
+            }
             return false;
-        }
-        if (fn_held && shift_layer_held && keycode == KC_N) {
-            toggle_nkro();
+        case DFU_MODE:
+            if (record->event.pressed) {
+                arm_dfu_reset();
+            }
             return false;
-        }
-        if (fn_held && shift_layer_held && keycode == KC_S) {
-            cycle_socd_mode();
+        case EEPROM_CLEAR:
+            if (record->event.pressed) {
+                clear_eeprom_with_feedback();
+            }
             return false;
-        }
-        if (fn_held && enter_layer_held && keycode == KC_ESC) {
-            arm_dfu_reset();
-            return false;
-        }
-        if (fn_held && enter_layer_held && keycode == KC_E) {
-            clear_eeprom_with_feedback();
-            return false;
-        }
     }
 
     if (!process_sentence_case(keycode, record)) {

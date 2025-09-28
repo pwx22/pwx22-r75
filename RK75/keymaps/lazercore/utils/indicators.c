@@ -86,6 +86,16 @@ static inline void set_indicator_color_scaled(uint8_t index, const rgb_t *color,
 }
 
 static void apply_layer_dimming(uint8_t led_min, uint8_t led_max, float brightness) {
+    if (brightness <= 0.0f) {
+        for (uint8_t i = led_min; i < led_max; ++i) {
+            if (is_indicator_led(i)) {
+                continue;
+            }
+            rgb_matrix_set_color(i, 0, 0, 0);
+        }
+        return;
+    }
+
     if (brightness >= 0.999f) {
         return;
     }
@@ -163,12 +173,8 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
 
     float accent_brightness = 1.0f;
-    if (layer3_active) {
+    if (fn_held || layer2_active || layer3_active) {
         accent_brightness = 0.0f;
-    } else if (layer2_active) {
-        accent_brightness = 0.4f;
-    } else if (fn_held) {
-        accent_brightness = 0.6f;
     }
 
     if (!fn_held) {
