@@ -50,7 +50,7 @@ static void set_nkro_state(bool enabled, bool trigger_feedback) {
         keyboard_nkro_disable();
     }
     keymap_config.nkro = enabled;
-    eeconfig_update_keymap(keymap_config.raw);
+    eeconfig_update_keymap(&keymap_config);
     indicators_set_nkro(enabled, trigger_feedback);
 }
 
