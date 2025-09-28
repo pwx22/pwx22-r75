@@ -51,18 +51,24 @@ static inline uint8_t scale_channel(uint8_t value, float brightness) {
     return (uint8_t)(scaled + 0.5f);
 }
 
-static inline void set_indicator_color(uint8_t index, const rgb_t *color) {
-    RGB_MATRIX_INDICATOR_SET_COLOR(index, color->r, color->g, color->b);
+static inline void set_indicator_color(uint8_t index, const rgb_t *color, uint8_t led_min, uint8_t led_max) {
+    if (index < led_min || index >= led_max) {
+        return;
+    }
+    rgb_matrix_set_color(index, color->r, color->g, color->b);
 }
 
-static inline void set_indicator_color_scaled(uint8_t index, const rgb_t *color, float brightness) {
+static inline void set_indicator_color_scaled(uint8_t index, const rgb_t *color, float brightness, uint8_t led_min, uint8_t led_max) {
     if (brightness <= 0.0f) {
         return;
     }
-    RGB_MATRIX_INDICATOR_SET_COLOR(index,
-                                   scale_channel(color->r, brightness),
-                                   scale_channel(color->g, brightness),
-                                   scale_channel(color->b, brightness));
+    if (index < led_min || index >= led_max) {
+        return;
+    }
+    rgb_matrix_set_color(index,
+                         scale_channel(color->r, brightness),
+                         scale_channel(color->g, brightness),
+                         scale_channel(color->b, brightness));
 }
 
 void indicators_set_fn(bool pressed) {
@@ -99,9 +105,9 @@ void indicators_trigger_eeprom_feedback(void) {
     eeprom_flash_timer = timer_read();
 }
 
-static void highlight_f_keys(const uint8_t *leds, uint8_t count, const rgb_t *color) {
+static void highlight_f_keys(const uint8_t *leds, uint8_t count, const rgb_t *color, uint8_t led_min, uint8_t led_max) {
     for (uint8_t i = 0; i < count; ++i) {
-        set_indicator_color(leds[i], color);
+        set_indicator_color(leds[i], color, led_min, led_max);
     }
 }
 
@@ -120,7 +126,7 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
     if (dfu_flash_on) {
         for (uint8_t i = led_min; i < led_max; ++i) {
-            set_indicator_color(i, &color_red);
+            set_indicator_color(i, &color_red, led_min, led_max);
         }
         return false;
     }
@@ -136,48 +142,48 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
     if (!fn_held) {
         if (keymap_config.no_gui) {
-            set_indicator_color_scaled(LED_WIN, &color_red, accent_brightness);
+            set_indicator_color_scaled(LED_WIN, &color_red, accent_brightness, led_min, led_max);
         }
         if (is_sentence_case_on()) {
-            set_indicator_color_scaled(LED_CAPS, &color_green, accent_brightness);
+            set_indicator_color_scaled(LED_CAPS, &color_green, accent_brightness, led_min, led_max);
         }
     }
 
     if (layer2_active) {
-        set_indicator_color(LED_KEY_S, &color_purple);
+        set_indicator_color(LED_KEY_S, &color_purple, led_min, led_max);
         if (keymap_config.nkro) {
-            set_indicator_color(LED_KEY_N, &color_orange);
+            set_indicator_color(LED_KEY_N, &color_orange, led_min, led_max);
         } else {
-            set_indicator_color(LED_KEY_N, &base_color);
+            set_indicator_color(LED_KEY_N, &base_color, led_min, led_max);
         }
     }
 
     if (layer3_active) {
-        set_indicator_color(LED_ENTER, &base_color);
+        set_indicator_color(LED_ENTER, &base_color, led_min, led_max);
         if (fn_held) {
-            set_indicator_color(LED_ESC, &color_red);
-            set_indicator_color(LED_KEY_E, &color_red);
+            set_indicator_color(LED_ESC, &color_red, led_min, led_max);
+            set_indicator_color(LED_KEY_E, &color_red, led_min, led_max);
         }
     }
 
     if (fn_held) {
-        set_indicator_color(LED_RSFT, &color_blue);
-        set_indicator_color(LED_ENTER, &color_blue);
+        set_indicator_color(LED_RSFT, &color_blue, led_min, led_max);
+        set_indicator_color(LED_ENTER, &color_blue, led_min, led_max);
         if (!(layer2_active || layer3_active)) {
             if (keymap_config.no_gui) {
-                set_indicator_color(LED_WIN, &color_green);
+                set_indicator_color(LED_WIN, &color_green, led_min, led_max);
             } else {
-                set_indicator_color(LED_WIN, &color_red);
+                set_indicator_color(LED_WIN, &color_red, led_min, led_max);
             }
             if (is_sentence_case_on()) {
-                set_indicator_color(LED_CAPS, &color_green);
+                set_indicator_color(LED_CAPS, &color_green, led_min, led_max);
             } else {
-                set_indicator_color(LED_CAPS, &color_red);
+                set_indicator_color(LED_CAPS, &color_red, led_min, led_max);
             }
         }
         if (layer3_active) {
-            set_indicator_color(LED_ESC, &color_red);
-            set_indicator_color(LED_KEY_E, &color_red);
+            set_indicator_color(LED_ESC, &color_red, led_min, led_max);
+            set_indicator_color(LED_KEY_E, &color_red, led_min, led_max);
         }
     }
 
@@ -192,7 +198,7 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
     if (eeprom_flash_on) {
         for (uint8_t i = 0; i < sizeof(eeprom_feedback_leds); ++i) {
-            set_indicator_color(eeprom_feedback_leds[i], &color_red);
+            set_indicator_color(eeprom_feedback_leds[i], &color_red, led_min, led_max);
         }
     }
 
@@ -201,9 +207,9 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         if (elapsed >= 320) {
             nkro_flash_type = 0;
         } else if (nkro_flash_type == 1) {
-            highlight_f_keys(f1_to_f12, sizeof(f1_to_f12), &color_orange);
+            highlight_f_keys(f1_to_f12, sizeof(f1_to_f12), &color_orange, led_min, led_max);
         } else {
-            highlight_f_keys(f5_to_f8, sizeof(f5_to_f8), &color_orange);
+            highlight_f_keys(f5_to_f8, sizeof(f5_to_f8), &color_orange, led_min, led_max);
         }
     }
 
@@ -214,19 +220,19 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         } else {
             switch (socd_flash_mode) {
                 case 1:  // Neutralize
-                    highlight_f_keys(f5_to_f8, sizeof(f5_to_f8), &color_purple);
+                    highlight_f_keys(f5_to_f8, sizeof(f5_to_f8), &color_purple, led_min, led_max);
                     break;
                 case 2:  // Last wins
                     if (elapsed < 240) {
-                        highlight_f_keys(f1_to_f4, sizeof(f1_to_f4), &color_purple);
+                        highlight_f_keys(f1_to_f4, sizeof(f1_to_f4), &color_purple, led_min, led_max);
                     } else {
-                        highlight_f_keys(f9_to_f12, sizeof(f9_to_f12), &color_purple);
+                        highlight_f_keys(f9_to_f12, sizeof(f9_to_f12), &color_purple, led_min, led_max);
                     }
                     break;
                 case 3: {  // First wins
-                    highlight_f_keys(f5_to_f8, sizeof(f5_to_f8), &color_purple);
+                    highlight_f_keys(f5_to_f8, sizeof(f5_to_f8), &color_purple, led_min, led_max);
                     if (((elapsed / 120) % 2U) == 0) {
-                        highlight_f_keys(f9_to_f12, sizeof(f9_to_f12), &color_purple);
+                        highlight_f_keys(f9_to_f12, sizeof(f9_to_f12), &color_purple, led_min, led_max);
                     }
                     break;
                 }
