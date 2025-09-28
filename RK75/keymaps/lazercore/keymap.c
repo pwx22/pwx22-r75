@@ -21,6 +21,8 @@ enum custom_keycodes {
 };
 
 static bool fn_held = false;
+static bool right_shift_pressed = false;
+static bool right_enter_pressed = false;
 static bool shift_layer_held = false;
 static bool enter_layer_held = false;
 static bool dfu_pending = false;
@@ -86,6 +88,7 @@ static void clear_eeprom_with_feedback(void) {
 
 void keyboard_post_init_user(void) {
     update_socd_resolution(socd_mode);
+    sentence_case_off();
 }
 
 // clang-format off
@@ -177,27 +180,29 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 };
 #endif
 
-static void set_shift_layer(bool pressed) {
-    shift_layer_held = pressed;
-    indicators_set_layer2(pressed);
-    if (pressed) {
+static void set_shift_layer(bool active) {
+    if (shift_layer_held == active) {
+        return;
+    }
+    shift_layer_held = active;
+    indicators_set_layer2(active);
+    if (active) {
         layer_on(_SHIFT);
-        register_code(KC_RSFT);
     } else {
         layer_off(_SHIFT);
-        unregister_code(KC_RSFT);
     }
 }
 
-static void set_enter_layer(bool pressed) {
-    enter_layer_held = pressed;
-    indicators_set_layer3(pressed);
-    if (pressed) {
+static void set_enter_layer(bool active) {
+    if (enter_layer_held == active) {
+        return;
+    }
+    enter_layer_held = active;
+    indicators_set_layer3(active);
+    if (active) {
         layer_on(_ENTER);
-        register_code(KC_ENT);
     } else {
         layer_off(_ENTER);
-        unregister_code(KC_ENT);
     }
 }
 
@@ -205,21 +210,52 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (keycode == MO(_FN)) {
         fn_held = record->event.pressed;
         indicators_set_fn(fn_held);
+        if (fn_held) {
+            if (right_shift_pressed) {
+                set_shift_layer(true);
+            }
+            if (right_enter_pressed) {
+                set_enter_layer(true);
+            }
+        } else {
+            if (shift_layer_held) {
+                set_shift_layer(false);
+            }
+            if (enter_layer_held) {
+                set_enter_layer(false);
+            }
+        }
     }
 
     switch (keycode) {
         case RSFT_L2:
             if (record->event.pressed) {
-                set_shift_layer(true);
+                right_shift_pressed = true;
+                register_code(KC_RSFT);
+                if (fn_held) {
+                    set_shift_layer(true);
+                }
             } else {
-                set_shift_layer(false);
+                right_shift_pressed = false;
+                unregister_code(KC_RSFT);
+                if (shift_layer_held) {
+                    set_shift_layer(false);
+                }
             }
             return false;
         case RENTER_L3:
             if (record->event.pressed) {
-                set_enter_layer(true);
+                right_enter_pressed = true;
+                register_code(KC_ENT);
+                if (fn_held) {
+                    set_enter_layer(true);
+                }
             } else {
-                set_enter_layer(false);
+                right_enter_pressed = false;
+                unregister_code(KC_ENT);
+                if (enter_layer_held) {
+                    set_enter_layer(false);
+                }
             }
             return false;
     }

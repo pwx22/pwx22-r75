@@ -2,6 +2,7 @@
 #include "sentence_case.h"
 #include "timer.h"
 #include "eeconfig.h"
+#include "rgb_matrix.h"
 
 static const rgb_t base_color = {.r = 0xFF, .g = 0x5F, .b = 0x40};
 static const rgb_t color_red = {.r = 0xFF, .g = 0x00, .b = 0x00};
@@ -15,7 +16,7 @@ enum {
     LED_WIN = 77,
     LED_CAPS = 50,
     LED_RSFT = 64,
-    LED_ENTER = 5,
+    LED_ENTER = 62,
     LED_KEY_N = 69,
     LED_KEY_S = 52,
     LED_KEY_E = 46,
@@ -50,8 +51,18 @@ static inline uint8_t scale_channel(uint8_t value, float brightness) {
     return (uint8_t)(scaled + 0.5f);
 }
 
-static inline void set_color(uint8_t index, const rgb_t *color) {
-    rgb_matrix_set_color(index, color->r, color->g, color->b);
+static inline void set_indicator_color(uint8_t index, const rgb_t *color) {
+    RGB_MATRIX_INDICATOR_SET_COLOR(index, color->r, color->g, color->b);
+}
+
+static inline void set_indicator_color_scaled(uint8_t index, const rgb_t *color, float brightness) {
+    if (brightness <= 0.0f) {
+        return;
+    }
+    RGB_MATRIX_INDICATOR_SET_COLOR(index,
+                                   scale_channel(color->r, brightness),
+                                   scale_channel(color->g, brightness),
+                                   scale_channel(color->b, brightness));
 }
 
 void indicators_set_fn(bool pressed) {
@@ -90,7 +101,7 @@ void indicators_trigger_eeprom_feedback(void) {
 
 static void highlight_f_keys(const uint8_t *leds, uint8_t count, const rgb_t *color) {
     for (uint8_t i = 0; i < count; ++i) {
-        set_color(leds[i], color);
+        set_indicator_color(leds[i], color);
     }
 }
 
@@ -109,69 +120,64 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
     if (dfu_flash_on) {
         for (uint8_t i = led_min; i < led_max; ++i) {
-            set_color(i, &color_red);
+            set_indicator_color(i, &color_red);
         }
         return false;
     }
 
-    float brightness = 1.0f;
+    float accent_brightness = 1.0f;
     if (layer3_active) {
-        brightness = 0.0f;
+        accent_brightness = 0.0f;
     } else if (layer2_active) {
-        brightness = 0.4f;
+        accent_brightness = 0.4f;
     } else if (fn_held) {
-        brightness = 0.6f;
+        accent_brightness = 0.6f;
     }
 
-    const uint8_t base_r = scale_channel(base_color.r, brightness);
-    const uint8_t base_g = scale_channel(base_color.g, brightness);
-    const uint8_t base_b = scale_channel(base_color.b, brightness);
-
-    for (uint8_t i = led_min; i < led_max; ++i) {
-        rgb_matrix_set_color(i, base_r, base_g, base_b);
-    }
-
-    if (keymap_config.no_gui && !fn_held) {
-        set_color(LED_WIN, &color_red);
-    }
-    if (is_sentence_case_on()) {
-        set_color(LED_CAPS, &color_green);
+    if (!fn_held) {
+        if (keymap_config.no_gui) {
+            set_indicator_color_scaled(LED_WIN, &color_red, accent_brightness);
+        }
+        if (is_sentence_case_on()) {
+            set_indicator_color_scaled(LED_CAPS, &color_green, accent_brightness);
+        }
     }
 
     if (layer2_active) {
-        set_color(LED_RSFT, &base_color);
-        set_color(LED_KEY_S, &color_purple);
+        set_indicator_color(LED_KEY_S, &color_purple);
         if (keymap_config.nkro) {
-            set_color(LED_KEY_N, &color_orange);
+            set_indicator_color(LED_KEY_N, &color_orange);
         } else {
-            set_color(LED_KEY_N, &base_color);
+            set_indicator_color(LED_KEY_N, &base_color);
         }
     }
 
     if (layer3_active) {
-        set_color(LED_ENTER, &base_color);
+        set_indicator_color(LED_ENTER, &base_color);
         if (fn_held) {
-            set_color(LED_ESC, &color_red);
-            set_color(LED_KEY_E, &color_red);
+            set_indicator_color(LED_ESC, &color_red);
+            set_indicator_color(LED_KEY_E, &color_red);
         }
     }
 
     if (fn_held) {
-        set_color(LED_RSFT, &color_blue);
-        set_color(LED_ENTER, &color_blue);
-        if (keymap_config.no_gui) {
-            set_color(LED_WIN, &color_green);
-        } else {
-            set_color(LED_WIN, &color_red);
-        }
-        if (is_sentence_case_on()) {
-            set_color(LED_CAPS, &color_green);
-        } else {
-            set_color(LED_CAPS, &color_red);
+        set_indicator_color(LED_RSFT, &color_blue);
+        set_indicator_color(LED_ENTER, &color_blue);
+        if (!(layer2_active || layer3_active)) {
+            if (keymap_config.no_gui) {
+                set_indicator_color(LED_WIN, &color_green);
+            } else {
+                set_indicator_color(LED_WIN, &color_red);
+            }
+            if (is_sentence_case_on()) {
+                set_indicator_color(LED_CAPS, &color_green);
+            } else {
+                set_indicator_color(LED_CAPS, &color_red);
+            }
         }
         if (layer3_active) {
-            set_color(LED_ESC, &color_red);
-            set_color(LED_KEY_E, &color_red);
+            set_indicator_color(LED_ESC, &color_red);
+            set_indicator_color(LED_KEY_E, &color_red);
         }
     }
 
@@ -186,7 +192,7 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
     if (eeprom_flash_on) {
         for (uint8_t i = 0; i < sizeof(eeprom_feedback_leds); ++i) {
-            set_color(eeprom_feedback_leds[i], &color_red);
+            set_indicator_color(eeprom_feedback_leds[i], &color_red);
         }
     }
 
