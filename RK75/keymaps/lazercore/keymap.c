@@ -11,6 +11,8 @@
 #include "utils/socd_cleaner.h"
 
 void clear_keyboard_but_mods(void);
+void keyboard_nkro_enable(void);
+void keyboard_nkro_disable(void);
 
 enum custom_keycodes {
     SENT_CASE_TG = SAFE_RANGE,
@@ -42,7 +44,13 @@ static void set_winlock(bool enabled) {
 
 static void set_nkro_state(bool enabled, bool trigger_feedback) {
     nkro_enabled = enabled;
-    set_nkro(enabled);
+    if (enabled) {
+        keyboard_nkro_enable();
+    } else {
+        keyboard_nkro_disable();
+    }
+    keymap_config.nkro = enabled;
+    eeconfig_update_keymap(keymap_config.raw);
     indicators_set_nkro(enabled, trigger_feedback);
 }
 
@@ -89,7 +97,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,  KC_PGUP,
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,            KC_ENT,   KC_PGDN,
         KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,            KC_UP,
-        KC_LCTL,  KC_LCMD,  KC_LALT,                      KC_SPC,                                 KC_RALT,  MO(1),    KC_LEFT,  KC_DOWN,  KC_RGHT
+        KC_LCTL,  KC_LCMD,  KC_LALT,                      KC_SPC,                                 KC_RALT,  MO(1),    KC_LEFT,
+        KC_DOWN,  KC_RGHT
     ),
     [1] = LAYOUT(
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
@@ -97,7 +106,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
         SENT_CASE_TG, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,            MO(3),   _______,
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  MO(2),              _______,
-        _______,  WINLOCK_TG, _______,                      _______,                               _______,  _______,  _______,  _______,  _______
+        _______,  WINLOCK_TG, _______,                      _______,                               _______,  _______,  _______,
+        _______,  _______
     ),
     [2] = LAYOUT(
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
@@ -105,7 +115,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
         _______,  _______,  SOCD_MODE_TOG, _______, _______, _______, _______, _______, _______, _______, _______, _______,            _______, _______,
         _______,  _______,  _______,  _______,  _______,  _______,  NKRO_MODE_TOG, _______, _______, _______, _______, _______,          _______,
-        _______,  _______,  _______,                      _______,                               _______,  _______,  _______,  _______,  _______
+        _______,  _______,  _______,                      _______,                               _______,  _______,  _______,
+        _______,  _______
     ),
     [3] = LAYOUT(
         DFU_MODE_KEY, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
@@ -113,7 +124,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,  _______,  _______,  CLEAR_EEPROM_KEY, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______, _______,
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,            _______,
-        _______,  _______,  _______,                      _______,                               _______,  _______,  _______,  _______,  _______
+        _______,  _______,  _______,                      _______,                               _______,  _______,  _______,
+        _______,  _______
     ),
     [4] = LAYOUT(
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
@@ -124,6 +136,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,  WINLOCK_TG, _______,                      _______,                               _______,  _______,  _______,  _______,  _______
     ),
 };
+#if defined(ENCODER_MAP_ENABLE)
+const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
+    [0] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
+    [1] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
+    [2] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
+    [3] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
+    [4] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
+};
+#endif
 // clang-format on
 
 void keyboard_post_init_user(void) {
