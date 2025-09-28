@@ -22,6 +22,11 @@ enum {
     LED_KEY_E = 46,
 };
 
+static const uint8_t indicator_leds[] = {
+    LED_ESC,  LED_WIN,  LED_CAPS, LED_RSFT,
+    LED_ENTER, LED_KEY_N, LED_KEY_S, LED_KEY_E,
+};
+
 static const uint8_t f1_to_f12[] = {20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9};
 static const uint8_t f1_to_f4[] = {20, 19, 18, 17};
 static const uint8_t f5_to_f8[] = {16, 15, 14, 13};
@@ -51,6 +56,15 @@ static inline uint8_t scale_channel(uint8_t value, float brightness) {
     return (uint8_t)(scaled + 0.5f);
 }
 
+static inline bool is_indicator_led(uint8_t index) {
+    for (uint8_t i = 0; i < sizeof(indicator_leds) / sizeof(indicator_leds[0]); ++i) {
+        if (indicator_leds[i] == index) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static inline void set_indicator_color(uint8_t index, const rgb_t *color, uint8_t led_min, uint8_t led_max) {
     if (index < led_min || index >= led_max) {
         return;
@@ -69,6 +83,23 @@ static inline void set_indicator_color_scaled(uint8_t index, const rgb_t *color,
                          scale_channel(color->r, brightness),
                          scale_channel(color->g, brightness),
                          scale_channel(color->b, brightness));
+}
+
+static void apply_layer_dimming(uint8_t led_min, uint8_t led_max, float brightness) {
+    if (brightness >= 0.999f) {
+        return;
+    }
+
+    const uint8_t dim_r = scale_channel(base_color.r, brightness);
+    const uint8_t dim_g = scale_channel(base_color.g, brightness);
+    const uint8_t dim_b = scale_channel(base_color.b, brightness);
+
+    for (uint8_t i = led_min; i < led_max; ++i) {
+        if (is_indicator_led(i)) {
+            continue;
+        }
+        rgb_matrix_set_color(i, dim_r, dim_g, dim_b);
+    }
 }
 
 void indicators_set_fn(bool pressed) {
@@ -148,6 +179,8 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
             set_indicator_color_scaled(LED_CAPS, &color_green, accent_brightness, led_min, led_max);
         }
     }
+
+    apply_layer_dimming(led_min, led_max, accent_brightness);
 
     if (layer2_active) {
         set_indicator_color(LED_KEY_S, &color_purple, led_min, led_max);
