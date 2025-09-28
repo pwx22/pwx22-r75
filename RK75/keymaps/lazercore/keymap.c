@@ -6,10 +6,11 @@
 #include "bootloader.h"
 #include "deferred_exec.h"
 #include "eeconfig.h"
-#include "protocol.h"
 #include "utils/indicators.h"
 #include "utils/sentence_case.h"
 #include "utils/socd_cleaner.h"
+
+void clear_keyboard_but_mods(void);
 
 enum custom_keycodes {
     SENT_CASE_TG = SAFE_RANGE,
