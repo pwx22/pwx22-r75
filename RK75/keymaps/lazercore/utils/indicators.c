@@ -164,9 +164,9 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         bool keep_active = true;
         switch (socd_feedback_mode) {
             case SOCD_MODE_LAST:
-                if (elapsed <= 5000) {
+                if (elapsed <= 500) {
                     apply_key_list_color(f_keys_1_4, ARRAY_SIZE(f_keys_1_4), led_min, led_max, 0x9B, 0x59, 0xFF);
-                } else if (elapsed <= 10000) {
+                } else if (elapsed <= 1000) {
                     apply_key_list_color(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, 0x9B, 0x59, 0xFF);
                 } else {
                     keep_active = false;
