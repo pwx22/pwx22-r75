@@ -5,10 +5,32 @@
 #define LED_INDEX_WIN 77
 #define LED_INDEX_ENTER 62
 #define LED_INDEX_RSFT 64
+#define LED_INDEX_FN 1
 #define LED_INDEX_S 52
 #define LED_INDEX_N 69
 #define LED_INDEX_ESC 21
 #define LED_INDEX_E 46
+
+typedef struct {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+} rgb_color_t;
+
+static const rgb_color_t COLOR_OFF = {0x00, 0x00, 0x00};
+static const rgb_color_t COLOR_BASE_LAYER = {0xE6, 0x56, 0x3A};
+static const rgb_color_t COLOR_SENTENCE_ON = {0x74, 0xFF, 0x77};
+static const rgb_color_t COLOR_WINLOCK_ON = {0xFF, 0x21, 0x21};
+static const rgb_color_t COLOR_LAYER1_FN = {0xA0, 0xFF, 0xEE};
+static const rgb_color_t COLOR_LAYER1_RSFT = {0x60, 0x99, 0x8F};
+static const rgb_color_t COLOR_LAYER1_ENTER = {0x99, 0x00, 0x00};
+static const rgb_color_t COLOR_LAYER1_TOGGLE_OFF = {0xFF, 0x21, 0x21};
+static const rgb_color_t COLOR_LAYER1_TOGGLE_ON = {0x74, 0xFF, 0x77};
+static const rgb_color_t COLOR_LAYER2_FN = {0xA0, 0xFF, 0xEE};
+static const rgb_color_t COLOR_LAYER2_RSFT = {0xA0, 0xFF, 0xEE};
+static const rgb_color_t COLOR_LAYER2_SOCD = {0xFF, 0x40, 0x0D};
+static const rgb_color_t COLOR_LAYER2_NKRO = {0xFF, 0x12, 0x98};
+static const rgb_color_t COLOR_LAYER3_KEY = {0xFF, 0x00, 0x00};
 
 static const uint8_t f_keys_1_4[] = {20, 19, 18, 17};
 static const uint8_t f_keys_5_8[] = {16, 15, 14, 13};
@@ -42,10 +64,24 @@ static void set_color_if_visible(uint8_t index, uint8_t min, uint8_t max, uint8_
     }
 }
 
+static void set_color_rgb(uint8_t index, uint8_t min, uint8_t max, const rgb_color_t *color) {
+    set_color_if_visible(index, min, max, color->r, color->g, color->b);
+}
+
+static void fill_range_with_color(uint8_t min, uint8_t max, const rgb_color_t *color) {
+    for (uint8_t i = min; i < max; i++) {
+        rgb_matrix_set_color(i, color->r, color->g, color->b);
+    }
+}
+
 static void apply_key_list_color(const uint8_t *indices, uint8_t count, uint8_t min, uint8_t max, uint8_t r, uint8_t g, uint8_t b) {
     for (uint8_t i = 0; i < count; i++) {
         set_color_if_visible(indices[i], min, max, r, g, b);
     }
+}
+
+static void apply_key_list_rgb(const uint8_t *indices, uint8_t count, uint8_t min, uint8_t max, const rgb_color_t *color) {
+    apply_key_list_color(indices, count, min, max, color->r, color->g, color->b);
 }
 
 void indicators_set_sentence_case(bool enabled) {
@@ -94,46 +130,41 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
 
     uint8_t layer = get_highest_layer(layer_state | default_layer_state);
+    bool layer_is_base = (layer == 0 || layer == 4);
     bool layer_is_fn = (layer == 1);
     bool layer_is_socd = (layer == 2);
     bool layer_is_system = (layer == 3);
 
-    if (layer_is_fn || layer_is_socd || layer_is_system) {
-        for (uint8_t i = led_min; i < led_max; i++) {
-            rgb_matrix_set_color(i, 0, 0, 0);
-        }
+    if (layer_is_base) {
+        fill_range_with_color(led_min, led_max, &COLOR_BASE_LAYER);
+    } else {
+        fill_range_with_color(led_min, led_max, &COLOR_OFF);
     }
 
     if (layer_is_fn) {
-        set_color_if_visible(LED_INDEX_ENTER, led_min, led_max, 0x4D, 0xA6, 0xFF);
-        set_color_if_visible(LED_INDEX_RSFT, led_min, led_max, 0x4D, 0xA6, 0xFF);
-        const uint8_t caps_color_g = sentence_case_active ? 0xFF : 0x00;
-        const uint8_t caps_color_r = sentence_case_active ? 0x00 : 0xFF;
-        const uint8_t caps_color_b = sentence_case_active ? 0x66 : 0x00;
-        set_color_if_visible(LED_INDEX_CAPS, led_min, led_max, caps_color_r, caps_color_g, caps_color_b);
-        const bool win_active = winlock_active;
-        const uint8_t win_r = win_active ? 0x00 : 0xFF;
-        const uint8_t win_g = win_active ? 0xFF : 0x00;
-        const uint8_t win_b = win_active ? 0x66 : 0x00;
-        set_color_if_visible(LED_INDEX_WIN, led_min, led_max, win_r, win_g, win_b);
-    } else {
-        if (layer == 0 || layer == 4) {
-            if (sentence_case_active) {
-                set_color_if_visible(LED_INDEX_CAPS, led_min, led_max, 0x00, 0xFF, 0x66);
-            }
-            if (winlock_active) {
-                set_color_if_visible(LED_INDEX_WIN, led_min, led_max, 0xFF, 0x00, 0x00);
-            }
+        set_color_rgb(LED_INDEX_FN, led_min, led_max, &COLOR_LAYER1_FN);
+        set_color_rgb(LED_INDEX_RSFT, led_min, led_max, &COLOR_LAYER1_RSFT);
+        set_color_rgb(LED_INDEX_ENTER, led_min, led_max, &COLOR_LAYER1_ENTER);
+        const rgb_color_t *caps_color = sentence_case_active ? &COLOR_LAYER1_TOGGLE_ON : &COLOR_LAYER1_TOGGLE_OFF;
+        set_color_rgb(LED_INDEX_CAPS, led_min, led_max, caps_color);
+        const rgb_color_t *win_color = winlock_active ? &COLOR_LAYER1_TOGGLE_ON : &COLOR_LAYER1_TOGGLE_OFF;
+        set_color_rgb(LED_INDEX_WIN, led_min, led_max, win_color);
+    } else if (layer_is_socd) {
+        set_color_rgb(LED_INDEX_FN, led_min, led_max, &COLOR_LAYER2_FN);
+        set_color_rgb(LED_INDEX_RSFT, led_min, led_max, &COLOR_LAYER2_RSFT);
+        set_color_rgb(LED_INDEX_S, led_min, led_max, &COLOR_LAYER2_SOCD);
+        set_color_rgb(LED_INDEX_N, led_min, led_max, &COLOR_LAYER2_NKRO);
+    } else if (layer_is_system) {
+        set_color_rgb(LED_INDEX_FN, led_min, led_max, &COLOR_LAYER3_KEY);
+        set_color_rgb(LED_INDEX_ENTER, led_min, led_max, &COLOR_LAYER3_KEY);
+        set_color_rgb(LED_INDEX_ESC, led_min, led_max, &COLOR_LAYER3_KEY);
+        set_color_rgb(LED_INDEX_E, led_min, led_max, &COLOR_LAYER3_KEY);
+    } else if (layer_is_base) {
+        if (sentence_case_active) {
+            set_color_rgb(LED_INDEX_CAPS, led_min, led_max, &COLOR_SENTENCE_ON);
         }
-
-        if (layer_is_socd) {
-            set_color_if_visible(LED_INDEX_S, led_min, led_max, 0x9B, 0x59, 0xFF);
-            set_color_if_visible(LED_INDEX_N, led_min, led_max, 0xFF, 0xA5, 0x00);
-        }
-
-        if (layer_is_system) {
-            set_color_if_visible(LED_INDEX_ESC, led_min, led_max, 0xFF, 0x00, 0x00);
-            set_color_if_visible(LED_INDEX_E, led_min, led_max, 0xFF, 0x00, 0x00);
+        if (winlock_active) {
+            set_color_rgb(LED_INDEX_WIN, led_min, led_max, &COLOR_WINLOCK_ON);
         }
     }
 
@@ -148,11 +179,11 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     if (nkro_feedback_active) {
         if (timer_elapsed(nkro_feedback_timer) <= 1000) {
             if (nkro_feedback_state) {
-                apply_key_list_color(f_keys_5_8, ARRAY_SIZE(f_keys_5_8), led_min, led_max, 0xFF, 0xA5, 0x00);
+                apply_key_list_rgb(f_keys_5_8, ARRAY_SIZE(f_keys_5_8), led_min, led_max, &COLOR_LAYER2_NKRO);
             } else {
-                apply_key_list_color(f_keys_1_4, ARRAY_SIZE(f_keys_1_4), led_min, led_max, 0xFF, 0xA5, 0x00);
-                apply_key_list_color(f_keys_5_8, ARRAY_SIZE(f_keys_5_8), led_min, led_max, 0xFF, 0xA5, 0x00);
-                apply_key_list_color(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, 0xFF, 0xA5, 0x00);
+                apply_key_list_rgb(f_keys_1_4, ARRAY_SIZE(f_keys_1_4), led_min, led_max, &COLOR_LAYER2_NKRO);
+                apply_key_list_rgb(f_keys_5_8, ARRAY_SIZE(f_keys_5_8), led_min, led_max, &COLOR_LAYER2_NKRO);
+                apply_key_list_rgb(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, &COLOR_LAYER2_NKRO);
             }
         } else {
             nkro_feedback_active = false;
@@ -164,36 +195,26 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         bool keep_active = true;
         switch (socd_feedback_mode) {
             case SOCD_MODE_LAST:
-                if (elapsed <= 500) {
-                    apply_key_list_color(f_keys_1_4, ARRAY_SIZE(f_keys_1_4), led_min, led_max, 0x9B, 0x59, 0xFF);
-                } else if (elapsed <= 1000) {
-                    apply_key_list_color(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, 0x9B, 0x59, 0xFF);
+                if (elapsed <= 5000) {
+                    apply_key_list_rgb(f_keys_1_4, ARRAY_SIZE(f_keys_1_4), led_min, led_max, &COLOR_LAYER2_SOCD);
+                } else if (elapsed <= 10000) {
+                    apply_key_list_rgb(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, &COLOR_LAYER2_SOCD);
                 } else {
                     keep_active = false;
                 }
                 break;
             case SOCD_MODE_NEUTRAL:
                 if (elapsed <= 1000) {
-                    apply_key_list_color(f_keys_5_8, ARRAY_SIZE(f_keys_5_8), led_min, led_max, 0x9B, 0x59, 0xFF);
+                    apply_key_list_rgb(f_keys_5_8, ARRAY_SIZE(f_keys_5_8), led_min, led_max, &COLOR_LAYER2_SOCD);
                 } else {
                     keep_active = false;
                 }
                 break;
             case SOCD_MODE_FIRST:
                 if (elapsed <= 1000) {
-                    apply_key_list_color(f_keys_1_4, ARRAY_SIZE(f_keys_1_4), led_min, led_max, 0x9B, 0x59, 0xFF);
-                    if (elapsed >= 250) {
-                        uint16_t blink_elapsed = elapsed - 250;
-                        if (blink_elapsed < 750) {
-                            uint8_t phase = blink_elapsed / 250;
-                            if (phase % 2 == 0) {
-                                apply_key_list_color(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, 0x9B, 0x59, 0xFF);
-                            } else {
-                                apply_key_list_color(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, 0x00, 0x00, 0x00);
-                            }
-                        } else {
-                            apply_key_list_color(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, 0x9B, 0x59, 0xFF);
-                        }
+                    apply_key_list_rgb(f_keys_1_4, ARRAY_SIZE(f_keys_1_4), led_min, led_max, &COLOR_LAYER2_SOCD);
+                    if (elapsed >= 500) {
+                        apply_key_list_rgb(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, &COLOR_LAYER2_SOCD);
                     }
                 } else {
                     keep_active = false;
