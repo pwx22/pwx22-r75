@@ -182,8 +182,18 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
             case SOCD_MODE_FIRST:
                 if (elapsed <= 1000) {
                     apply_key_list_color(f_keys_1_4, ARRAY_SIZE(f_keys_1_4), led_min, led_max, 0x9B, 0x59, 0xFF);
-                    if (elapsed >= 500) {
-                        apply_key_list_color(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, 0x9B, 0x59, 0xFF);
+                    if (elapsed >= 250) {
+                        uint16_t blink_elapsed = elapsed - 250;
+                        if (blink_elapsed < 750) {
+                            uint8_t phase = blink_elapsed / 250;
+                            if (phase % 2 == 0) {
+                                apply_key_list_color(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, 0x9B, 0x59, 0xFF);
+                            } else {
+                                apply_key_list_color(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, 0x00, 0x00, 0x00);
+                            }
+                        } else {
+                            apply_key_list_color(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, 0x9B, 0x59, 0xFF);
+                        }
                     }
                 } else {
                     keep_active = false;

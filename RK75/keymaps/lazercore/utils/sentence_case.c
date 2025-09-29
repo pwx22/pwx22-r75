@@ -58,6 +58,8 @@ static uint16_t key_buffer[SENTENCE_CASE_BUFFER_SIZE] = {0};
 #endif  // SENTENCE_CASE_BUFFER_SIZE > 1
 static uint8_t state_history[STATE_HISTORY_SIZE];
 static uint16_t suppress_key = KC_NO;
+static bool shift_forced = false;
+static uint16_t shift_forced_keycode = KC_NO;
 static uint8_t sentence_state = STATE_INIT;
 
 // Sets the current state to `new_state`.
@@ -88,9 +90,19 @@ static void clear_state_history(void) {
   }
 }
 
+static void release_forced_shift(void) {
+  if (shift_forced) {
+    del_weak_mods(MOD_BIT(KC_LSFT));
+    send_keyboard_report();
+    shift_forced = false;
+    shift_forced_keycode = KC_NO;
+  }
+}
+
 void sentence_case_clear(void) {
   clear_state_history();
   suppress_key = KC_NO;
+  release_forced_shift();
 #if SENTENCE_CASE_BUFFER_SIZE > 1
   memset(key_buffer, 0, sizeof(key_buffer));
 #endif  // SENTENCE_CASE_BUFFER_SIZE > 1
@@ -105,6 +117,7 @@ void sentence_case_on(void) {
 
 void sentence_case_off(void) {
   if (sentence_state != STATE_DISABLED) {
+    release_forced_shift();
     set_sentence_state(STATE_DISABLED);
   }
 }
@@ -135,8 +148,15 @@ void sentence_case_task(void) {
 #endif  // SENTENCE_CASE_TIMEOUT > 0
 
 bool process_sentence_case(uint16_t keycode, keyrecord_t* record) {
-  // Only process while enabled, and only process press events.
-  if (sentence_state == STATE_DISABLED || !record->event.pressed) {
+  if (!record->event.pressed) {
+    if (shift_forced && keycode == shift_forced_keycode) {
+      release_forced_shift();
+    }
+    return true;
+  }
+
+  // Only process while enabled.
+  if (sentence_state == STATE_DISABLED) {
     return true;
   }
 
@@ -234,8 +254,12 @@ bool process_sentence_case(uint16_t keycode, keyrecord_t* record) {
           // This is the start of a sentence.
           if (keycode != suppress_key) {
             suppress_key = keycode;
-            if (!altgr_active) {
-              set_oneshot_mods(MOD_BIT(KC_LSFT));  // Shift mod to capitalize.
+            if (!(mods & MOD_MASK_SHIFT)) {
+              release_forced_shift();
+              add_weak_mods(MOD_BIT(KC_LSFT));
+              send_keyboard_report();
+              shift_forced = true;
+              shift_forced_keycode = keycode;
             }
             new_state = STATE_WORD;
           }
