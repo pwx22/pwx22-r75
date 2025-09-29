@@ -201,6 +201,7 @@ bool process_sentence_case(uint16_t keycode, keyrecord_t* record) {
   }
 
   const uint8_t mods = get_mods() | get_weak_mods() | get_oneshot_mods();
+  const bool altgr_active = mods & MOD_BIT(KC_RALT);
   uint8_t new_state = STATE_INIT;
 
   // We search for sentence beginnings using a simple finite state machine. It
@@ -233,7 +234,9 @@ bool process_sentence_case(uint16_t keycode, keyrecord_t* record) {
           // This is the start of a sentence.
           if (keycode != suppress_key) {
             suppress_key = keycode;
-            set_oneshot_mods(MOD_BIT(KC_LSFT));  // Shift mod to capitalize.
+            if (!altgr_active) {
+              set_oneshot_mods(MOD_BIT(KC_LSFT));  // Shift mod to capitalize.
+            }
             new_state = STATE_WORD;
           }
           break;
