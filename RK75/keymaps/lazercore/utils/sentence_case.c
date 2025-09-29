@@ -254,7 +254,7 @@ bool process_sentence_case(uint16_t keycode, keyrecord_t* record) {
           // This is the start of a sentence.
           if (keycode != suppress_key) {
             suppress_key = keycode;
-            if (!(mods & MOD_MASK_SHIFT)) {
+            if (!(mods & MOD_MASK_SHIFT) && !altgr_active) {
               release_forced_shift();
               add_weak_mods(MOD_BIT(KC_LSFT));
               send_keyboard_report();
