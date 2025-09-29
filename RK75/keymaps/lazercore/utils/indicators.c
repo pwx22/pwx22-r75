@@ -18,7 +18,6 @@ typedef struct {
 } rgb_color_t;
 
 static const rgb_color_t COLOR_OFF = {0x00, 0x00, 0x00};
-static const rgb_color_t COLOR_BASE_LAYER = {0xE6, 0x56, 0x3A};
 static const rgb_color_t COLOR_SENTENCE_ON = {0x74, 0xFF, 0x77};
 static const rgb_color_t COLOR_WINLOCK_ON = {0xFF, 0x21, 0x21};
 static const rgb_color_t COLOR_LAYER1_FN = {0xA0, 0xFF, 0xEE};
@@ -135,9 +134,7 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     bool layer_is_socd = (layer == 2);
     bool layer_is_system = (layer == 3);
 
-    if (layer_is_base) {
-        fill_range_with_color(led_min, led_max, &COLOR_BASE_LAYER);
-    } else {
+    if (!layer_is_base) {
         fill_range_with_color(led_min, led_max, &COLOR_OFF);
     }
 
@@ -159,7 +156,9 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         set_color_rgb(LED_INDEX_ENTER, led_min, led_max, &COLOR_LAYER3_KEY);
         set_color_rgb(LED_INDEX_ESC, led_min, led_max, &COLOR_LAYER3_KEY);
         set_color_rgb(LED_INDEX_E, led_min, led_max, &COLOR_LAYER3_KEY);
-    } else if (layer_is_base) {
+    }
+
+    if (layer_is_base) {
         if (sentence_case_active) {
             set_color_rgb(LED_INDEX_CAPS, led_min, led_max, &COLOR_SENTENCE_ON);
         }
