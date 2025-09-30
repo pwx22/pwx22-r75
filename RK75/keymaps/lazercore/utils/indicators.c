@@ -30,8 +30,8 @@ static const rgb_color_t COLOR_LAYER2_RSFT = {0xFF, 0xC4, 0x9D};
 static const rgb_color_t COLOR_LAYER2_SOCD = {0xFF, 0x40, 0x0D};
 static const rgb_color_t COLOR_LAYER2_NKRO = {0xFF, 0x12, 0x98};
 static const rgb_color_t COLOR_LAYER3_KEY = {0xFF, 0x00, 0x00};
-static const rgb_color_t COLOR_SOCD_INDICATOR_DIM = {0x1A, 0x0A, 0x01};
-static const rgb_color_t COLOR_SOCD_INDICATOR_BRIGHT = {0xB2, 0x3B, 0x09};
+static const rgb_color_t COLOR_SOCD_INDICATOR_DIM = {0x1A, 0x0D, 0x06};
+static const rgb_color_t COLOR_SOCD_INDICATOR_BRIGHT = {0xB3, 0x3C, 0x1B};
 static const rgb_color_t COLOR_NKRO_INDICATOR = {0xB2, 0x28, 0x9A};
 
 static const uint8_t f_keys_1_4[] = {20, 19, 18, 17};
