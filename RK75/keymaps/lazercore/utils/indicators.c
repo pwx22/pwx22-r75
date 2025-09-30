@@ -30,8 +30,8 @@ static const rgb_color_t COLOR_LAYER2_RSFT = {0xFF, 0xC4, 0x9D};
 static const rgb_color_t COLOR_LAYER2_SOCD = {0xFF, 0x40, 0x0D};
 static const rgb_color_t COLOR_LAYER2_NKRO = {0xFF, 0x12, 0x98};
 static const rgb_color_t COLOR_LAYER3_KEY = {0xFF, 0x00, 0x00};
-static const rgb_color_t COLOR_SOCD_INDICATOR_DIM = {0x4D, 0x1A, 0x0B};
-static const rgb_color_t COLOR_SOCD_INDICATOR_BRIGHT = {0xB2, 0x3E, 0x1A};
+static const rgb_color_t COLOR_SOCD_INDICATOR_DIM = {0x1A, 0x0A, 0x01};
+static const rgb_color_t COLOR_SOCD_INDICATOR_BRIGHT = {0xB2, 0x3B, 0x09};
 static const rgb_color_t COLOR_NKRO_INDICATOR = {0xB2, 0x28, 0x9A};
 
 static const uint8_t f_keys_1_4[] = {20, 19, 18, 17};
@@ -210,11 +210,11 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     if (nkro_feedback_active) {
         if (timer_elapsed(nkro_feedback_timer) <= 1000) {
             if (nkro_feedback_state) {
-                apply_key_list_rgb(f_keys_5_8, ARRAY_SIZE(f_keys_5_8), led_min, led_max, &COLOR_LAYER2_NKRO);
-            } else {
                 apply_key_list_rgb(f_keys_1_4, ARRAY_SIZE(f_keys_1_4), led_min, led_max, &COLOR_LAYER2_NKRO);
                 apply_key_list_rgb(f_keys_5_8, ARRAY_SIZE(f_keys_5_8), led_min, led_max, &COLOR_LAYER2_NKRO);
                 apply_key_list_rgb(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, &COLOR_LAYER2_NKRO);
+            } else {
+                apply_key_list_rgb(f_keys_5_8, ARRAY_SIZE(f_keys_5_8), led_min, led_max, &COLOR_LAYER2_NKRO);
             }
         } else {
             nkro_feedback_active = false;
