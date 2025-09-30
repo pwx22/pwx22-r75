@@ -18,23 +18,31 @@ typedef struct {
 } rgb_color_t;
 
 static const rgb_color_t COLOR_OFF = {0x00, 0x00, 0x00};
-static const rgb_color_t COLOR_SENTENCE_ON = {0x74, 0xFF, 0x77};
-static const rgb_color_t COLOR_WINLOCK_ON = {0xFF, 0x21, 0x21};
-static const rgb_color_t COLOR_LAYER1_FN = {0xA0, 0xFF, 0xEE};
-static const rgb_color_t COLOR_LAYER1_RSFT = {0x60, 0x99, 0x8F};
-static const rgb_color_t COLOR_LAYER1_ENTER = {0x99, 0x00, 0x00};
-static const rgb_color_t COLOR_LAYER1_TOGGLE_OFF = {0xFF, 0x21, 0x21};
-static const rgb_color_t COLOR_LAYER1_TOGGLE_ON = {0x74, 0xFF, 0x77};
-static const rgb_color_t COLOR_LAYER2_FN = {0xA0, 0xFF, 0xEE};
-static const rgb_color_t COLOR_LAYER2_RSFT = {0xA0, 0xFF, 0xEE};
+static const rgb_color_t COLOR_SENTENCE_ON = {0x7E, 0xFF, 0x45};
+static const rgb_color_t COLOR_WINLOCK_ON = {0xFF, 0x0E, 0x0E};
+static const rgb_color_t COLOR_LAYER1_FN = {0xFF, 0xC4, 0x9D};
+static const rgb_color_t COLOR_LAYER1_RSFT = {0x66, 0x4E, 0x3F};
+static const rgb_color_t COLOR_LAYER1_ENTER = {0x66, 0x4E, 0x3F};
+static const rgb_color_t COLOR_LAYER1_TOGGLE_OFF = {0xFF, 0x0E, 0x0E};
+static const rgb_color_t COLOR_LAYER1_TOGGLE_ON = {0x7E, 0xFF, 0x45};
+static const rgb_color_t COLOR_LAYER2_FN = {0x66, 0x4E, 0x3F};
+static const rgb_color_t COLOR_LAYER2_RSFT = {0xFF, 0xC4, 0x9D};
 static const rgb_color_t COLOR_LAYER2_SOCD = {0xFF, 0x40, 0x0D};
 static const rgb_color_t COLOR_LAYER2_NKRO = {0xFF, 0x12, 0x98};
 static const rgb_color_t COLOR_LAYER3_KEY = {0xFF, 0x00, 0x00};
+static const rgb_color_t COLOR_SOCD_INDICATOR_DIM = {0x4D, 0x1A, 0x0B};
+static const rgb_color_t COLOR_SOCD_INDICATOR_BRIGHT = {0xB2, 0x3E, 0x1A};
+static const rgb_color_t COLOR_NKRO_INDICATOR = {0xB2, 0x28, 0x9A};
 
 static const uint8_t f_keys_1_4[] = {20, 19, 18, 17};
 static const uint8_t f_keys_5_8[] = {16, 15, 14, 13};
 static const uint8_t f_keys_9_12[] = {12, 11, 10, 9};
 static const uint8_t eeprom_feedback_leds[] = {25, 26, 45, 54, 72, 73, 52, 47};
+
+#define LED_INDEX_NUM1 23
+#define LED_INDEX_NUM2 24
+#define LED_INDEX_NUM6 28
+#define LED_INDEX_NUM0 32
 
 static bool sentence_case_active = false;
 static bool winlock_active = false;
@@ -42,10 +50,12 @@ static bool winlock_active = false;
 static bool socd_feedback_active = false;
 static socd_mode_t socd_feedback_mode = SOCD_MODE_LAST;
 static uint16_t socd_feedback_timer = 0;
+static socd_mode_t socd_current_mode = SOCD_MODE_LAST;
 
 static bool nkro_feedback_active = false;
 static bool nkro_feedback_state = false;
 static uint16_t nkro_feedback_timer = 0;
+static bool nkro_active = false;
 
 static bool dfu_feedback_active = false;
 static uint16_t dfu_feedback_timer = 0;
@@ -92,6 +102,7 @@ void indicators_set_winlock(bool enabled) {
 }
 
 void indicators_set_socd_mode(socd_mode_t mode, bool trigger_feedback) {
+    socd_current_mode = mode;
     if (trigger_feedback) {
         socd_feedback_active = true;
         socd_feedback_mode = mode;
@@ -100,6 +111,7 @@ void indicators_set_socd_mode(socd_mode_t mode, bool trigger_feedback) {
 }
 
 void indicators_set_nkro(bool enabled, bool trigger_feedback) {
+    nkro_active = enabled;
     if (trigger_feedback) {
         nkro_feedback_active = true;
         nkro_feedback_state = enabled;
@@ -151,6 +163,26 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         set_color_rgb(LED_INDEX_RSFT, led_min, led_max, &COLOR_LAYER2_RSFT);
         set_color_rgb(LED_INDEX_S, led_min, led_max, &COLOR_LAYER2_SOCD);
         set_color_rgb(LED_INDEX_N, led_min, led_max, &COLOR_LAYER2_NKRO);
+        const rgb_color_t *digit1_color = &COLOR_SOCD_INDICATOR_DIM;
+        const rgb_color_t *digit2_color = &COLOR_SOCD_INDICATOR_DIM;
+        switch (socd_current_mode) {
+            case SOCD_MODE_FIRST:
+                digit1_color = &COLOR_SOCD_INDICATOR_BRIGHT;
+                break;
+            case SOCD_MODE_LAST:
+                digit2_color = &COLOR_SOCD_INDICATOR_BRIGHT;
+                break;
+            case SOCD_MODE_NEUTRAL:
+            default:
+                break;
+        }
+        set_color_rgb(LED_INDEX_NUM1, led_min, led_max, digit1_color);
+        set_color_rgb(LED_INDEX_NUM2, led_min, led_max, digit2_color);
+        if (nkro_active) {
+            set_color_rgb(LED_INDEX_NUM0, led_min, led_max, &COLOR_NKRO_INDICATOR);
+        } else {
+            set_color_rgb(LED_INDEX_NUM6, led_min, led_max, &COLOR_NKRO_INDICATOR);
+        }
     } else if (layer_is_system) {
         set_color_rgb(LED_INDEX_FN, led_min, led_max, &COLOR_LAYER3_KEY);
         set_color_rgb(LED_INDEX_ENTER, led_min, led_max, &COLOR_LAYER3_KEY);
@@ -194,25 +226,25 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         bool keep_active = true;
         switch (socd_feedback_mode) {
             case SOCD_MODE_LAST:
-                if (elapsed <= 5000) {
+                if (elapsed < 500) {
                     apply_key_list_rgb(f_keys_1_4, ARRAY_SIZE(f_keys_1_4), led_min, led_max, &COLOR_LAYER2_SOCD);
-                } else if (elapsed <= 10000) {
+                } else if (elapsed < 1000) {
                     apply_key_list_rgb(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, &COLOR_LAYER2_SOCD);
                 } else {
                     keep_active = false;
                 }
                 break;
             case SOCD_MODE_NEUTRAL:
-                if (elapsed <= 1000) {
+                if (elapsed < 1000) {
                     apply_key_list_rgb(f_keys_5_8, ARRAY_SIZE(f_keys_5_8), led_min, led_max, &COLOR_LAYER2_SOCD);
                 } else {
                     keep_active = false;
                 }
                 break;
             case SOCD_MODE_FIRST:
-                if (elapsed <= 1000) {
+                if (elapsed < 1000) {
                     apply_key_list_rgb(f_keys_1_4, ARRAY_SIZE(f_keys_1_4), led_min, led_max, &COLOR_LAYER2_SOCD);
-                    if (elapsed >= 500) {
+                    if ((elapsed >= 250 && elapsed < 500) || (elapsed >= 750 && elapsed < 1000)) {
                         apply_key_list_rgb(f_keys_9_12, ARRAY_SIZE(f_keys_9_12), led_min, led_max, &COLOR_LAYER2_SOCD);
                     }
                 } else {
