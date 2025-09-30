@@ -141,10 +141,10 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
 
     uint8_t layer = get_highest_layer(layer_state | default_layer_state);
-    bool layer_is_base = (layer == 0 || layer == 4);
-    bool layer_is_fn = (layer == 1);
-    bool layer_is_socd = (layer == 2);
-    bool layer_is_system = (layer == 3);
+    bool layer_is_base = (layer == 0 || layer == 1 || layer == 2);
+    bool layer_is_fn = (layer == 3);
+    bool layer_is_socd = (layer == 4);
+    bool layer_is_system = (layer == 5);
 
     if (!layer_is_base) {
         fill_range_with_color(led_min, led_max, &COLOR_OFF);

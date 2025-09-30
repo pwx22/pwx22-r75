@@ -16,24 +16,24 @@ Toggle sentence case mode with `Fn + Caps Lock`. The feature is off by default a
 Toggle the Windows key lock with `Fn + Win`. When enabled, both operating-system keys are blocked and the Win key glows red on the base layer.
 
 ### SOCD Mode Cycle
-Hold `Fn + Right Shift`, then press `S` to cycle simultaneous-opposite cardinal direction (SOCD) handling between **Last Input Wins**, **Neutral**, and **First Input Wins**. Each selection triggers dedicated function-row lighting feedback so you always know which mode is active.
+Hold `Fn`, keep `Right Shift` pressed to access the SOCD layer, then press `S` to cycle simultaneous-opposite cardinal direction (SOCD) handling between **Last Input Wins**, **Neutral**, and **First Input Wins**. Each selection triggers dedicated function-row lighting feedback so you always know which mode is active.
 
 ### NKRO Toggle
-Hold `Fn + Right Shift`, then press `N` to toggle between the default **6KRO** and **NKRO** reporting. Lighting feedback confirms the currently selected mode.
+Hold `Fn`, keep `Right Shift` pressed, then tap `N` to toggle between the default **6KRO** and **NKRO** reporting. Lighting feedback confirms the currently selected mode.
 
 ### Layer Lighting
-- **Layer 0**: Solid orange (RGB 255, 95, 64) by default—fully adjustable in VIA.
-- **Layer 1 (Fn)**: All keys are dark except **Enter**, **Right Shift**, **Caps Lock**, and **Win**, which illuminate according to their functions and toggle states.
-- **Layer 2**: Highlights the SOCD (`S`) and NKRO (`N`) controls in purple and orange respectively.
-- **Layer 3**: Emphasizes the DFU (`Esc`) and EEPROM Clear (`E`) controls in red.
+- **Layers 0–2**: Solid orange (RGB 255, 95, 64) by default—fully adjustable in VIA. Win Lock (red) and Sentence Case (green) status are indicated on the Windows and Caps Lock keys.
+- **Layer 3 (Fn)**: All keys are dark except **Enter**, **Right Shift**, **Caps Lock**, and **Win**, which illuminate according to their functions and toggle states.
+- **Layer 4 (SOCD/NKRO)**: Highlights the SOCD (`S`) and NKRO (`N`) controls in purple and orange respectively, along with numeric indicators for the active mode.
+- **Layer 5 (System)**: Emphasizes the DFU (`Esc`) and EEPROM Clear (`E`) controls in red.
+
+Layers 1 and 2 ship as clones of the base typing layer so you have two blank canvases ready for VIA custom layouts.
 
 ### Knob Controls
-- **Layer 0**: Volume control
-- **Layer 1**: Screen brightness
-- **Layer 2**: Media fast-forward/rewind
+- **Layers 0–2**: Volume control (counter-clockwise = volume down, clockwise = volume up, press = mute)
 
 ### DFU Mode
-Hold `Fn`, keep `Enter` pressed (momentary Layer 3), then tap `Esc`. The whole board flashes red for 0.5 s before entering the bootloader.
+Hold `Fn`, keep `Enter` pressed (momentary Layer 5), then tap `Esc`. The whole board flashes red for 0.5 s before entering the bootloader.
 
 ### Clear EEPROM
 Hold `Fn`, keep `Enter` pressed, then tap `E`. The keys `{3, 4, R, F, C, X, S, W}` flash red for 0.5 s before the EEPROM is cleared and the board resets.
