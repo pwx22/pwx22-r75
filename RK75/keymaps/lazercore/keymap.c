@@ -7,12 +7,16 @@
 #include "utils/audio_viz.h"
 #include "utils/sentence_case.h"
 #include "utils/type_alchemy.h"
+#if defined(VIA_ENABLE)
+#    include "via.h"
+#endif
 
 enum custom_keycodes {
   GAME_MODE = SAFE_RANGE,
-  AUDIO_VIZ = SAFE_RANGE+1,
-  TOGG_SEN_CASE = SAFE_RANGE+2,
-  TOGG_ALCH_TYPE = SAFE_RANGE+3,
+  AUDIO_VIZ,
+  TOGG_SEN_CASE,
+  TOGG_ALCH_TYPE,
+  ENCODER_BTN_0,
 };
 
 socd_cleaner_t socd_v = {{KC_W, KC_S}, SOCD_CLEANER_LAST};
@@ -21,7 +25,7 @@ socd_cleaner_t socd_h = {{KC_A, KC_D}, SOCD_CLEANER_LAST};
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     [0] = LAYOUT( /* Base */
-        KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_HOME,   KC_MUTE,
+        KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_HOME,   ENCODER_BTN_0,
         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,  KC_DEL,  
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,  KC_PGUP,    
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,            KC_ENT,   KC_PGDN,          
@@ -30,7 +34,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         ),
 
     [1] = LAYOUT( /* FN -> RGB */
-        _______,  TOGG_ALCH_TYPE,  UC_NEXT,  AC_TOGG ,  _______,  _______,  _______,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,   KC_SCRL,  QK_LAYER_LOCK,
+        _______,  TOGG_ALCH_TYPE,  UC_NEXT,  AC_TOGG ,  _______,  _______,  _______,  KC_MPRV,  KC_MPLY,  KC_MNXT,  ENCODER_BTN_0,  KC_VOLD,  KC_VOLU,   KC_SCRL,  QK_LAYER_LOCK,
         _______,  _______ ,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,   
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_INS,    RGB_MOD,  KC_BRIU,  
         TOGG_SEN_CASE,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,             _______,  KC_BRID, 
@@ -96,7 +100,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (keycode == AUDIO_VIZ && record->event.pressed) {
         if(audio_viz_enabled){
             disable_audio_viz();
-        } else { 
+        } else {
             enable_audio_viz();
         }
         return false;
@@ -110,6 +114,23 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         toggle_type_alchemy();
         return false;
     }
+#if defined(VIA_ENABLE) && defined(ENCODER_BUTTONS_ENABLE)
+    if (keycode == ENCODER_BTN_0 && record->event.pressed) {
+        layer_state_t current_state = layer_state | default_layer_state;
+        for (int8_t layer = DYNAMIC_KEYMAP_LAYER_COUNT - 1; layer >= 0; --layer) {
+            if (!(current_state & ((layer_state_t)1 << layer))) {
+                continue;
+            }
+
+            uint16_t encoder_keycode = dynamic_keymap_get_encoder_button(layer, 0, 0);
+            if (encoder_keycode != KC_TRNS) {
+                tap_code16(encoder_keycode);
+                break;
+            }
+        }
+        return false;
+    }
+#endif
     return true;
 }
 
