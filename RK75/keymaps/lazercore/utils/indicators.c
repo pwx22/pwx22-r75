@@ -69,6 +69,9 @@ static uint16_t dfu_feedback_timer = 0;
 static bool eeprom_feedback_active = false;
 static uint16_t eeprom_feedback_timer = 0;
 
+static bool night_mode_enabled = false;
+static HSV night_mode_hsv = {.h = 16, .s = 165, .v = 26};
+
 static rgb_color_t hsv_to_rgb_custom(uint8_t h, uint8_t s, uint8_t v) {
     rgb_color_t rgb = {v, v, v};
     if (s == 0 || v == 0) {
@@ -126,7 +129,7 @@ static inline bool led_in_bounds(uint8_t index, uint8_t min, uint8_t max) {
 }
 
 static rgb_color_t scale_for_brightness(rgb_color_t color) {
-    uint16_t value = rgb_matrix_config.hsv.v;
+    uint16_t value = night_mode_enabled ? night_mode_hsv.v : rgb_matrix_config.hsv.v;
     uint16_t base = RGB_MATRIX_DEFAULT_VAL;
     if (base == 0) {
         base = 255;
@@ -215,6 +218,14 @@ void indicators_trigger_eeprom_feedback(void) {
     eeprom_feedback_timer = timer_read();
 }
 
+void indicators_set_night_hsv(HSV hsv) {
+    night_mode_hsv = hsv;
+}
+
+void indicators_set_night_enabled(bool enabled) {
+    night_mode_enabled = enabled;
+}
+
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     if (dfu_feedback_active) {
         if (timer_elapsed(dfu_feedback_timer) <= 500) {
@@ -233,7 +244,8 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     bool layer_is_system = (layer == 5);
 
     if (layer_is_base) {
-        rgb_color_t base_color = hsv_to_rgb_custom(rgb_matrix_config.hsv.h, rgb_matrix_config.hsv.s, rgb_matrix_config.hsv.v);
+        HSV active_hsv = night_mode_enabled ? night_mode_hsv : rgb_matrix_config.hsv;
+        rgb_color_t base_color = hsv_to_rgb_custom(active_hsv.h, active_hsv.s, active_hsv.v);
         fill_range_with_raw_color(led_min, led_max, &base_color);
     } else {
         fill_range_with_color(led_min, led_max, &COLOR_OFF);

@@ -9,6 +9,7 @@
 #include "utils/indicators.h"
 #include "utils/sentence_case.h"
 #include "utils/socd_cleaner.h"
+#include "rgb_matrix.h"
 
 void clear_keyboard_but_mods(void);
 #if defined(NKRO_ENABLE)
@@ -27,17 +28,82 @@ enum custom_keycodes {
     NKRO_MODE_TOG,
     DFU_MODE_KEY,
     CLEAR_EEPROM_KEY,
+    NIGHT_MODE_TOG,
+    NIGHT_MODE_SAVE,
 };
 
 static bool winlock_enabled = false;
 static bool nkro_enabled = false;
 static socd_mode_t socd_mode = SOCD_MODE_LAST;
+static bool night_mode_active = false;
 
 static deferred_token dfu_token = INVALID_DEFERRED_TOKEN;
 static deferred_token eeprom_token = INVALID_DEFERRED_TOKEN;
 
 socd_cleaner_t socd_v = {{KC_W, KC_S}, SOCD_CLEANER_LAST, {false, false}, SOCD_FIRST_NONE};
 socd_cleaner_t socd_h = {{KC_A, KC_D}, SOCD_CLEANER_LAST, {false, false}, SOCD_FIRST_NONE};
+
+typedef union {
+    uint32_t raw;
+    struct {
+        uint8_t night_h;
+        uint8_t night_s;
+        uint8_t night_v;
+        uint8_t flags;
+    };
+} night_config_t;
+
+static night_config_t night_config;
+
+enum {
+    NIGHT_CONFIG_FLAG_VALID = 0xA5,
+};
+
+static HSV night_config_default_hsv(void) {
+    return (HSV){.h = 16, .s = 165, .v = 26};
+}
+
+static void night_config_write(void) {
+    eeconfig_update_user(night_config.raw);
+}
+
+static void night_mode_set_enabled(bool enabled) {
+    night_mode_active = enabled;
+    indicators_set_night_enabled(enabled);
+}
+
+static void night_config_set_hsv(HSV hsv, bool write_back) {
+    night_config.night_h = hsv.h;
+    night_config.night_s = hsv.s;
+    night_config.night_v = hsv.v;
+    night_config.flags = NIGHT_CONFIG_FLAG_VALID;
+    indicators_set_night_hsv(hsv);
+    if (write_back) {
+        night_config_write();
+    }
+}
+
+static void night_config_set_defaults(void) {
+    HSV defaults = night_config_default_hsv();
+    night_config_set_hsv(defaults, false);
+    night_config_write();
+    night_mode_set_enabled(false);
+}
+
+static void night_config_load(void) {
+    night_config.raw = eeconfig_read_user();
+    if (night_config.flags != NIGHT_CONFIG_FLAG_VALID) {
+        night_config_set_defaults();
+    } else {
+        HSV stored = {.h = night_config.night_h, .s = night_config.night_s, .v = night_config.night_v};
+        indicators_set_night_hsv(stored);
+        night_mode_set_enabled(false);
+    }
+}
+
+static void night_config_store_current(void) {
+    night_config_set_hsv(rgb_matrix_config.hsv, true);
+}
 
 static void configure_socd_instance(socd_cleaner_t *state, uint8_t resolution) {
     state->resolution = resolution;
@@ -116,6 +182,7 @@ static uint32_t eeprom_deferred_callback(uint32_t trigger_time, void *context) {
     apply_socd_mode(SOCD_MODE_LAST, false);
     layer_move(0);
     socd_cleaner_enabled = true;
+    night_config_set_defaults();
     eeprom_token = INVALID_DEFERRED_TOKEN;
     return 0;
 }
@@ -128,7 +195,7 @@ KC_F12,   TO(1),   KC_MUTE,
         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,
 KC_EQL,   KC_BSPC,  KC_DEL,
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,
-KC_RBRC,  KC_BSLS,  KC_PGUP,
+        KC_RBRC,  KC_BSLS,  NIGHT_MODE_TOG,
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,
           KC_ENT,   KC_PGDN,
         KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,
@@ -142,7 +209,7 @@ KC_F12,   TO(2),   KC_MUTE,
         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,
 KC_EQL,   KC_BSPC,  KC_DEL,
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,
-KC_RBRC,  KC_BSLS,  KC_PGUP,
+        KC_RBRC,  KC_BSLS,  NIGHT_MODE_TOG,
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,
           KC_ENT,   KC_PGDN,
         KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,
@@ -156,7 +223,7 @@ KC_F12,   TO(0),   KC_MUTE,
         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,
 KC_EQL,   KC_BSPC,  KC_DEL,
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,
-KC_RBRC,  KC_BSLS,  KC_PGUP,
+        KC_RBRC,  KC_BSLS,  NIGHT_MODE_TOG,
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,
           KC_ENT,   KC_PGDN,
         KC_LSFT,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,
@@ -166,7 +233,7 @@ KC_RBRC,  KC_BSLS,  KC_PGUP,
     ),
     [3] = LAYOUT(
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
-_______,  _______,  _______,
+_______,  NIGHT_MODE_SAVE,  _______,
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
 _______,  _______,  _______,
         _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,
@@ -226,6 +293,7 @@ void keyboard_post_init_user(void) {
     set_nkro_state(keymap_config.nkro, false);
     apply_socd_mode(SOCD_MODE_LAST, false);
     socd_cleaner_enabled = true;
+    night_config_load();
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -282,6 +350,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                     cancel_deferred_exec(eeprom_token);
                 }
                 eeprom_token = defer_exec(500, eeprom_deferred_callback, NULL);
+            }
+            return false;
+        case NIGHT_MODE_TOG:
+            if (record->event.pressed) {
+                night_mode_set_enabled(!night_mode_active);
+            }
+            return false;
+        case NIGHT_MODE_SAVE:
+            if (record->event.pressed) {
+                night_config_store_current();
             }
             return false;
     }

@@ -27,6 +27,10 @@ Hold `Fn`, keep `Right Shift` pressed, then tap `N` to toggle between the defaul
 - **Layer 4 (SOCD/NKRO)**: Highlights the SOCD (`S`) and NKRO (`N`) controls in purple and orange respectively, along with numeric indicators for the active mode.
 - **Layer 5 (System)**: Emphasizes the DFU (`Esc`) and EEPROM Clear (`E`) controls in red.
 
+### Night Mode
+- Tap `Home` on the base layer to toggle layers 0–2 between the VIA-selected color/brightness and the stored **Night** preset.
+- Hold `Fn` (momentary layer 3) and press `Home` to capture the current VIA hue/brightness as the new **Night** preset (saved to EEPROM). The firmware ships with #ff985a at 10 % brightness as the default Night profile.
+
 Layers 1 and 2 ship as clones of the base typing layer so you have two blank canvases ready for VIA custom layouts.
 
 ### Knob Controls
