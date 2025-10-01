@@ -14,6 +14,7 @@
 #define LED_INDEX_N 69
 #define LED_INDEX_ESC 21
 #define LED_INDEX_E 46
+#define LED_INDEX_CUSTOM70 70
 
 typedef struct {
     uint8_t r;
@@ -226,6 +227,10 @@ void indicators_set_night_enabled(bool enabled) {
     night_mode_enabled = enabled;
 }
 
+bool indicators_is_night_enabled(void) {
+    return night_mode_enabled;
+}
+
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     if (dfu_feedback_active) {
         if (timer_elapsed(dfu_feedback_timer) <= 500) {
@@ -243,10 +248,11 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     bool layer_is_socd = (layer == 4);
     bool layer_is_system = (layer == 5);
 
+    HSV active_hsv = night_mode_enabled ? night_mode_hsv : rgb_matrix_config.hsv;
+    rgb_color_t via_color = hsv_to_rgb_custom(active_hsv.h, active_hsv.s, active_hsv.v);
+
     if (layer_is_base) {
-        HSV active_hsv = night_mode_enabled ? night_mode_hsv : rgb_matrix_config.hsv;
-        rgb_color_t base_color = hsv_to_rgb_custom(active_hsv.h, active_hsv.s, active_hsv.v);
-        fill_range_with_raw_color(led_min, led_max, &base_color);
+        fill_range_with_raw_color(led_min, led_max, &via_color);
     } else {
         fill_range_with_color(led_min, led_max, &COLOR_OFF);
     }
@@ -259,6 +265,7 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         set_color_raw(LED_INDEX_CAPS, led_min, led_max, caps_color);
         const rgb_color_t *win_color = winlock_active ? &COLOR_LAYER1_TOGGLE_ON : &COLOR_LAYER1_TOGGLE_OFF;
         set_color_raw(LED_INDEX_WIN, led_min, led_max, win_color);
+        set_color_internal(LED_INDEX_CUSTOM70, led_min, led_max, &via_color, false);
     } else if (layer_is_socd) {
         set_color_raw(LED_INDEX_FN, led_min, led_max, &COLOR_LAYER2_FN);
         set_color_raw(LED_INDEX_RSFT, led_min, led_max, &COLOR_LAYER2_RSFT);

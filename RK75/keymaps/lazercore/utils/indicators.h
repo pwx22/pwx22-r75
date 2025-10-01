@@ -17,3 +17,4 @@ void indicators_trigger_dfu_feedback(void);
 void indicators_trigger_eeprom_feedback(void);
 void indicators_set_night_hsv(HSV hsv);
 void indicators_set_night_enabled(bool enabled);
+bool indicators_is_night_enabled(void);
