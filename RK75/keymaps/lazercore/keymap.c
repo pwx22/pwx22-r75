@@ -19,6 +19,20 @@ enum custom_keycodes {
   ENCODER_BTN_0,
 };
 
+#if defined(RGBLIGHT_ENABLE) || defined(RGB_MATRIX_ENABLE)
+#    define RGB_SAFE_MOD RGB_MOD
+#    define RGB_SAFE_VAI RGB_VAI
+#    define RGB_SAFE_SPD RGB_SPD
+#    define RGB_SAFE_VAD RGB_VAD
+#    define RGB_SAFE_SPI RGB_SPI
+#else
+#    define RGB_SAFE_MOD _______
+#    define RGB_SAFE_VAI _______
+#    define RGB_SAFE_SPD _______
+#    define RGB_SAFE_VAD _______
+#    define RGB_SAFE_SPI _______
+#endif
+
 socd_cleaner_t socd_v = {{KC_W, KC_S}, SOCD_CLEANER_LAST};
 socd_cleaner_t socd_h = {{KC_A, KC_D}, SOCD_CLEANER_LAST};
 // clang-format off
@@ -36,14 +50,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [1] = LAYOUT( /* FN -> RGB */
         _______,  TOGG_ALCH_TYPE,  UC_NEXT,  AC_TOGG ,  _______,  _______,  _______,  KC_MPRV,  KC_MPLY,  KC_MNXT,  ENCODER_BTN_0,  KC_VOLD,  KC_VOLU,   KC_SCRL,  QK_LAYER_LOCK,
         _______,  _______ ,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,   
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_INS,    RGB_MOD,  KC_BRIU,  
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  KC_INS,    RGB_SAFE_MOD,  KC_BRIU,  
         TOGG_SEN_CASE,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,             _______,  KC_BRID, 
-        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  MO(2),               RGB_VAI,
-        _______,  GU_TOGG,  _______,                      EE_CLR,                                 _______,  _______,            RGB_SPD,  RGB_VAD,  RGB_SPI 
+        _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  MO(2),               RGB_SAFE_VAI,
+        _______,  GU_TOGG,  _______,                      EE_CLR,                                 _______,  _______,            RGB_SAFE_SPD,  RGB_SAFE_VAD,  RGB_SAFE_SPI 
         ),
 
     [2] = LAYOUT( /* FN -> Bootloader*/
-    QK_BOOTLOADER,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  AUDIO_VIZ,
+    QK_BOOTLOADER,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  ENCODER_BTN_0,
     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   
     _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  
     _______,  _______,  _______,  _______,  _______,  GAME_MODE,  _______,  _______,  _______,  _______,  _______,  _______,            _______,  _______, 
