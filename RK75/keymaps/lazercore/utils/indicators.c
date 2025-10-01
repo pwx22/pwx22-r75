@@ -1,6 +1,9 @@
 #include "indicators.h"
 
 #include "rgb_matrix.h"
+#ifndef RGB_MATRIX_DEFAULT_VAL
+#    define RGB_MATRIX_DEFAULT_VAL 255
+#endif
 #define LED_INDEX_CAPS 50
 #define LED_INDEX_WIN 77
 #define LED_INDEX_ENTER 62
@@ -66,34 +69,110 @@ static uint16_t dfu_feedback_timer = 0;
 static bool eeprom_feedback_active = false;
 static uint16_t eeprom_feedback_timer = 0;
 
+static rgb_color_t hsv_to_rgb_custom(uint8_t h, uint8_t s, uint8_t v) {
+    rgb_color_t rgb = {v, v, v};
+    if (s == 0 || v == 0) {
+        rgb.r = v;
+        rgb.g = v;
+        rgb.b = v;
+        return rgb;
+    }
+
+    uint8_t region = h / 43;
+    uint16_t remainder = (h - (region * 43)) * 6;
+
+    uint8_t p = (uint16_t)v * (255 - s) / 255;
+    uint8_t q = (uint16_t)v * (255 - ((uint16_t)s * remainder / 255)) / 255;
+    uint8_t t = (uint16_t)v * (255 - ((uint16_t)s * (255 - remainder) / 255)) / 255;
+
+    switch (region) {
+        case 0:
+            rgb.r = v;
+            rgb.g = t;
+            rgb.b = p;
+            break;
+        case 1:
+            rgb.r = q;
+            rgb.g = v;
+            rgb.b = p;
+            break;
+        case 2:
+            rgb.r = p;
+            rgb.g = v;
+            rgb.b = t;
+            break;
+        case 3:
+            rgb.r = p;
+            rgb.g = q;
+            rgb.b = v;
+            break;
+        case 4:
+            rgb.r = t;
+            rgb.g = p;
+            rgb.b = v;
+            break;
+        default:
+            rgb.r = v;
+            rgb.g = p;
+            rgb.b = q;
+            break;
+    }
+
+    return rgb;
+}
+
 static inline bool led_in_bounds(uint8_t index, uint8_t min, uint8_t max) {
     return index >= min && index < max;
 }
 
-static void set_color_if_visible(uint8_t index, uint8_t min, uint8_t max, uint8_t r, uint8_t g, uint8_t b) {
-    if (led_in_bounds(index, min, max)) {
-        rgb_matrix_set_color(index, r, g, b);
+static rgb_color_t scale_for_brightness(rgb_color_t color) {
+    uint16_t value = rgb_matrix_config.hsv.v;
+    uint16_t base = RGB_MATRIX_DEFAULT_VAL;
+    if (base == 0) {
+        base = 255;
     }
+
+    uint16_t scaled = (uint16_t)color.r * value / base;
+    color.r = scaled > 255 ? 255 : (uint8_t)scaled;
+    scaled = (uint16_t)color.g * value / base;
+    color.g = scaled > 255 ? 255 : (uint8_t)scaled;
+    scaled = (uint16_t)color.b * value / base;
+    color.b = scaled > 255 ? 255 : (uint8_t)scaled;
+    return color;
+}
+
+static void set_color_internal(uint8_t index, uint8_t min, uint8_t max, const rgb_color_t *color, bool apply_brightness) {
+    if (!led_in_bounds(index, min, max)) {
+        return;
+    }
+    rgb_color_t out = apply_brightness ? scale_for_brightness(*color) : *color;
+    rgb_matrix_set_color(index, out.r, out.g, out.b);
 }
 
 static void set_color_rgb(uint8_t index, uint8_t min, uint8_t max, const rgb_color_t *color) {
-    set_color_if_visible(index, min, max, color->r, color->g, color->b);
+    set_color_internal(index, min, max, color, true);
+}
+
+static void fill_range_internal(uint8_t min, uint8_t max, const rgb_color_t *color, bool apply_brightness) {
+    rgb_color_t out = apply_brightness ? scale_for_brightness(*color) : *color;
+    for (uint8_t i = min; i < max; i++) {
+        rgb_matrix_set_color(i, out.r, out.g, out.b);
+    }
 }
 
 static void fill_range_with_color(uint8_t min, uint8_t max, const rgb_color_t *color) {
-    for (uint8_t i = min; i < max; i++) {
-        rgb_matrix_set_color(i, color->r, color->g, color->b);
-    }
+    fill_range_internal(min, max, color, true);
 }
 
-static void apply_key_list_color(const uint8_t *indices, uint8_t count, uint8_t min, uint8_t max, uint8_t r, uint8_t g, uint8_t b) {
-    for (uint8_t i = 0; i < count; i++) {
-        set_color_if_visible(indices[i], min, max, r, g, b);
-    }
+static void fill_range_with_raw_color(uint8_t min, uint8_t max, const rgb_color_t *color) {
+    fill_range_internal(min, max, color, false);
 }
 
 static void apply_key_list_rgb(const uint8_t *indices, uint8_t count, uint8_t min, uint8_t max, const rgb_color_t *color) {
-    apply_key_list_color(indices, count, min, max, color->r, color->g, color->b);
+    rgb_color_t out = scale_for_brightness(*color);
+    for (uint8_t i = 0; i < count; i++) {
+        set_color_internal(indices[i], min, max, &out, false);
+    }
 }
 
 void indicators_set_sentence_case(bool enabled) {
@@ -149,7 +228,10 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     bool layer_is_socd = (layer == 4);
     bool layer_is_system = (layer == 5);
 
-    if (!layer_is_base) {
+    if (layer_is_base) {
+        rgb_color_t base_color = hsv_to_rgb_custom(rgb_matrix_config.hsv.h, rgb_matrix_config.hsv.s, rgb_matrix_config.hsv.v);
+        fill_range_with_raw_color(led_min, led_max, &base_color);
+    } else {
         fill_range_with_color(led_min, led_max, &COLOR_OFF);
     }
 
@@ -209,7 +291,7 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
     if (eeprom_feedback_active) {
         if (timer_elapsed(eeprom_feedback_timer) <= 500) {
-            apply_key_list_color(eeprom_feedback_leds, ARRAY_SIZE(eeprom_feedback_leds), led_min, led_max, 0xFF, 0x00, 0x00);
+            apply_key_list_rgb(eeprom_feedback_leds, ARRAY_SIZE(eeprom_feedback_leds), led_min, led_max, &COLOR_LAYER3_KEY);
         } else {
             eeprom_feedback_active = false;
         }
