@@ -4,6 +4,7 @@
 #define LED_INDEX_CAPS 50
 #define LED_INDEX_WIN 77
 #define LED_INDEX_ENTER 62
+#define LED_INDEX_LAYER_TOGGLE 8
 #define LED_INDEX_RSFT 64
 #define LED_INDEX_FN 1
 #define LED_INDEX_S 52
@@ -23,12 +24,14 @@ static const rgb_color_t COLOR_WINLOCK_ON = {0xFF, 0x0E, 0x0E};
 static const rgb_color_t COLOR_LAYER1_FN = {0xFF, 0xC4, 0x9D};
 static const rgb_color_t COLOR_LAYER1_RSFT = {0x66, 0x4E, 0x3F};
 static const rgb_color_t COLOR_LAYER1_ENTER = {0x66, 0x4E, 0x3F};
+static const rgb_color_t COLOR_LAYER1_TO2 = {0x0F, 0x5C, 0x16};
 static const rgb_color_t COLOR_LAYER1_TOGGLE_OFF = {0xFF, 0x0E, 0x0E};
 static const rgb_color_t COLOR_LAYER1_TOGGLE_ON = {0x7E, 0xFF, 0x45};
 static const rgb_color_t COLOR_LAYER2_FN = {0x66, 0x4E, 0x3F};
 static const rgb_color_t COLOR_LAYER2_RSFT = {0xFF, 0xC4, 0x9D};
 static const rgb_color_t COLOR_LAYER2_SOCD = {0xFF, 0x40, 0x0D};
 static const rgb_color_t COLOR_LAYER2_NKRO = {0xFF, 0x12, 0x98};
+static const rgb_color_t COLOR_LAYER2_TO0 = {0x21, 0x21, 0x80};
 static const rgb_color_t COLOR_LAYER3_KEY = {0xFF, 0x00, 0x00};
 static const rgb_color_t COLOR_SOCD_INDICATOR_DIM = {0x1A, 0x0D, 0x06};
 static const rgb_color_t COLOR_SOCD_INDICATOR_BRIGHT = {0xB3, 0x3C, 0x1B};
@@ -191,6 +194,11 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
 
     if (layer_is_base) {
+        if (layer == 1) {
+            set_color_rgb(LED_INDEX_LAYER_TOGGLE, led_min, led_max, &COLOR_LAYER1_TO2);
+        } else if (layer == 2) {
+            set_color_rgb(LED_INDEX_LAYER_TOGGLE, led_min, led_max, &COLOR_LAYER2_TO0);
+        }
         if (sentence_case_active) {
             set_color_rgb(LED_INDEX_CAPS, led_min, led_max, &COLOR_SENTENCE_ON);
         }
