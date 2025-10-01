@@ -283,6 +283,17 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [4] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
     [5] = { ENCODER_CCW_CW(KC_TRNS, KC_TRNS) },
 };
+
+#    if defined(ENCODER_BUTTONS_ENABLE)
+const uint16_t PROGMEM encoder_button_map[][NUM_ENCODERS][NUM_ENCODER_BUTTONS] = {
+    [0] = { ENCODER_BUTTON(KC_MUTE) },
+    [1] = { ENCODER_BUTTON(KC_TRNS) },
+    [2] = { ENCODER_BUTTON(KC_TRNS) },
+    [3] = { ENCODER_BUTTON(KC_TRNS) },
+    [4] = { ENCODER_BUTTON(KC_TRNS) },
+    [5] = { ENCODER_BUTTON(KC_TRNS) },
+};
+#    endif
 #endif
 // clang-format on
 

@@ -39,7 +39,7 @@ void housekeeping_task_kb(void) {
         gpio_write_pin_high(LED_WIN_LOCK_PIN); // Turn off Win Lock LED
     }
 
-    bool mac_led_on = keymap_config.no_gui || indicators_is_night_enabled();
+    bool mac_led_on = indicators_is_night_enabled();
     if (mac_led_on) {
         gpio_write_pin_low(LED_MAC_PIN);  // Turn on Mac LED
     } else {

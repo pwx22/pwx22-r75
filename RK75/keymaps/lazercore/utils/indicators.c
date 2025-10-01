@@ -14,7 +14,7 @@
 #define LED_INDEX_N 69
 #define LED_INDEX_ESC 21
 #define LED_INDEX_E 46
-#define LED_INDEX_CUSTOM70 70
+#define LED_INDEX_CUSTOM70 5
 
 typedef struct {
     uint8_t r;
