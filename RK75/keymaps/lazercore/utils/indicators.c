@@ -153,6 +153,10 @@ static void set_color_rgb(uint8_t index, uint8_t min, uint8_t max, const rgb_col
     set_color_internal(index, min, max, color, true);
 }
 
+static void set_color_raw(uint8_t index, uint8_t min, uint8_t max, const rgb_color_t *color) {
+    set_color_internal(index, min, max, color, false);
+}
+
 static void fill_range_internal(uint8_t min, uint8_t max, const rgb_color_t *color, bool apply_brightness) {
     rgb_color_t out = apply_brightness ? scale_for_brightness(*color) : *color;
     for (uint8_t i = min; i < max; i++) {
@@ -236,18 +240,18 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
 
     if (layer_is_fn) {
-        set_color_rgb(LED_INDEX_FN, led_min, led_max, &COLOR_LAYER1_FN);
-        set_color_rgb(LED_INDEX_RSFT, led_min, led_max, &COLOR_LAYER1_RSFT);
-        set_color_rgb(LED_INDEX_ENTER, led_min, led_max, &COLOR_LAYER1_ENTER);
+        set_color_raw(LED_INDEX_FN, led_min, led_max, &COLOR_LAYER1_FN);
+        set_color_raw(LED_INDEX_RSFT, led_min, led_max, &COLOR_LAYER1_RSFT);
+        set_color_raw(LED_INDEX_ENTER, led_min, led_max, &COLOR_LAYER1_ENTER);
         const rgb_color_t *caps_color = sentence_case_active ? &COLOR_LAYER1_TOGGLE_ON : &COLOR_LAYER1_TOGGLE_OFF;
-        set_color_rgb(LED_INDEX_CAPS, led_min, led_max, caps_color);
+        set_color_raw(LED_INDEX_CAPS, led_min, led_max, caps_color);
         const rgb_color_t *win_color = winlock_active ? &COLOR_LAYER1_TOGGLE_ON : &COLOR_LAYER1_TOGGLE_OFF;
-        set_color_rgb(LED_INDEX_WIN, led_min, led_max, win_color);
+        set_color_raw(LED_INDEX_WIN, led_min, led_max, win_color);
     } else if (layer_is_socd) {
-        set_color_rgb(LED_INDEX_FN, led_min, led_max, &COLOR_LAYER2_FN);
-        set_color_rgb(LED_INDEX_RSFT, led_min, led_max, &COLOR_LAYER2_RSFT);
-        set_color_rgb(LED_INDEX_S, led_min, led_max, &COLOR_LAYER2_SOCD);
-        set_color_rgb(LED_INDEX_N, led_min, led_max, &COLOR_LAYER2_NKRO);
+        set_color_raw(LED_INDEX_FN, led_min, led_max, &COLOR_LAYER2_FN);
+        set_color_raw(LED_INDEX_RSFT, led_min, led_max, &COLOR_LAYER2_RSFT);
+        set_color_raw(LED_INDEX_S, led_min, led_max, &COLOR_LAYER2_SOCD);
+        set_color_raw(LED_INDEX_N, led_min, led_max, &COLOR_LAYER2_NKRO);
         const rgb_color_t *digit1_color = &COLOR_SOCD_INDICATOR_DIM;
         const rgb_color_t *digit2_color = &COLOR_SOCD_INDICATOR_DIM;
         switch (socd_current_mode) {
@@ -261,18 +265,18 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
             default:
                 break;
         }
-        set_color_rgb(LED_INDEX_NUM1, led_min, led_max, digit1_color);
-        set_color_rgb(LED_INDEX_NUM2, led_min, led_max, digit2_color);
+        set_color_raw(LED_INDEX_NUM1, led_min, led_max, digit1_color);
+        set_color_raw(LED_INDEX_NUM2, led_min, led_max, digit2_color);
         if (nkro_active) {
-            set_color_rgb(LED_INDEX_NUM0, led_min, led_max, &COLOR_NKRO_INDICATOR);
+            set_color_raw(LED_INDEX_NUM0, led_min, led_max, &COLOR_NKRO_INDICATOR);
         } else {
-            set_color_rgb(LED_INDEX_NUM6, led_min, led_max, &COLOR_NKRO_INDICATOR);
+            set_color_raw(LED_INDEX_NUM6, led_min, led_max, &COLOR_NKRO_INDICATOR);
         }
     } else if (layer_is_system) {
-        set_color_rgb(LED_INDEX_FN, led_min, led_max, &COLOR_LAYER3_KEY);
-        set_color_rgb(LED_INDEX_ENTER, led_min, led_max, &COLOR_LAYER3_KEY);
-        set_color_rgb(LED_INDEX_ESC, led_min, led_max, &COLOR_LAYER3_KEY);
-        set_color_rgb(LED_INDEX_E, led_min, led_max, &COLOR_LAYER3_KEY);
+        set_color_raw(LED_INDEX_FN, led_min, led_max, &COLOR_LAYER3_KEY);
+        set_color_raw(LED_INDEX_ENTER, led_min, led_max, &COLOR_LAYER3_KEY);
+        set_color_raw(LED_INDEX_ESC, led_min, led_max, &COLOR_LAYER3_KEY);
+        set_color_raw(LED_INDEX_E, led_min, led_max, &COLOR_LAYER3_KEY);
     }
 
     if (layer_is_base) {
