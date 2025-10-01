@@ -294,8 +294,8 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 #    if defined(ENCODER_BUTTONS_ENABLE)
 const uint16_t PROGMEM encoder_button_map[][NUM_ENCODERS][NUM_ENCODER_BUTTONS] = {
     [0] = { ENCODER_BUTTON(KC_MUTE) },
-    [1] = { ENCODER_BUTTON(KC_TRNS) },
-    [2] = { ENCODER_BUTTON(KC_TRNS) },
+    [1] = { ENCODER_BUTTON(KC_F21) },
+    [2] = { ENCODER_BUTTON(KC_F24) },
     [3] = { ENCODER_BUTTON(KC_TRNS) },
     [4] = { ENCODER_BUTTON(KC_TRNS) },
     [5] = { ENCODER_BUTTON(KC_TRNS) },
