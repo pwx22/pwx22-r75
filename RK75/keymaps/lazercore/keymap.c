@@ -10,6 +10,10 @@
 #include "utils/sentence_case.h"
 #include "utils/socd_cleaner.h"
 #include "rgb_matrix.h"
+#include "progmem.h"
+#if defined(VIA_ENABLE) && defined(ENCODER_BUTTONS_ENABLE)
+#    include "dynamic_keymap.h"
+#endif
 
 void clear_keyboard_but_mods(void);
 #if defined(NKRO_ENABLE)
@@ -183,6 +187,7 @@ static uint32_t eeprom_deferred_callback(uint32_t trigger_time, void *context) {
     layer_move(0);
     socd_cleaner_enabled = true;
     night_config_set_defaults();
+    restore_encoder_button_defaults_if_needed();
     eeprom_token = INVALID_DEFERRED_TOKEN;
     return 0;
 }
@@ -295,6 +300,34 @@ const uint16_t PROGMEM encoder_button_map[][NUM_ENCODERS][NUM_ENCODER_BUTTONS] =
 };
 #    endif
 #endif
+static void restore_encoder_button_defaults_if_needed(void) {
+#if defined(VIA_ENABLE) && defined(ENCODER_MAP_ENABLE) && defined(ENCODER_BUTTONS_ENABLE)
+    bool all_layers_unassigned = true;
+    for (uint8_t layer = 0; layer < ARRAY_SIZE(encoder_button_map) && all_layers_unassigned; ++layer) {
+        for (uint8_t encoder = 0; encoder < NUM_ENCODERS && all_layers_unassigned; ++encoder) {
+            for (uint8_t button = 0; button < NUM_ENCODER_BUTTONS; ++button) {
+                if (dynamic_keymap_get_encoder_button(layer, encoder, button) != KC_NO) {
+                    all_layers_unassigned = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!all_layers_unassigned) {
+        return;
+    }
+
+    for (uint8_t layer = 0; layer < ARRAY_SIZE(encoder_button_map); ++layer) {
+        for (uint8_t encoder = 0; encoder < NUM_ENCODERS; ++encoder) {
+            for (uint8_t button = 0; button < NUM_ENCODER_BUTTONS; ++button) {
+                uint16_t keycode = pgm_read_word(&encoder_button_map[layer][encoder][button]);
+                dynamic_keymap_set_encoder_button(layer, encoder, button, keycode);
+            }
+        }
+    }
+#endif
+}
 // clang-format on
 
 void keyboard_post_init_user(void) {
@@ -305,6 +338,7 @@ void keyboard_post_init_user(void) {
     apply_socd_mode(SOCD_MODE_LAST, false);
     socd_cleaner_enabled = true;
     night_config_load();
+    restore_encoder_button_defaults_if_needed();
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
