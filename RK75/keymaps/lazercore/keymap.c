@@ -44,6 +44,8 @@ static bool night_mode_active = false;
 static deferred_token dfu_token = INVALID_DEFERRED_TOKEN;
 static deferred_token eeprom_token = INVALID_DEFERRED_TOKEN;
 
+static void restore_encoder_button_defaults_if_needed(void);
+
 socd_cleaner_t socd_v = {{KC_W, KC_S}, SOCD_CLEANER_LAST, {false, false}, SOCD_FIRST_NONE};
 socd_cleaner_t socd_h = {{KC_A, KC_D}, SOCD_CLEANER_LAST, {false, false}, SOCD_FIRST_NONE};
 
