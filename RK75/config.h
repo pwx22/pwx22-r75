@@ -31,19 +31,10 @@
 
 // Set defaults for LED matrix
 #define RGB_MATRIX_DEFAULT_MODE RGB_MATRIX_SOLID_COLOR
-#define RGB_MATRIX_DEFAULT_HUE 240
-#define RGB_MATRIX_DEFAULT_SAT 255
-#define RGB_MATRIX_DEFAULT_VAL 120
+#define RGB_MATRIX_DEFAULT_HUE 16
+#define RGB_MATRIX_DEFAULT_SAT 165
+#define RGB_MATRIX_DEFAULT_VAL 128
 #define RGB_MATRIX_MAXIMUM_BRIGHTNESS 200
-
-// Enable the RGB Matrix Splash feature
-#define ENABLE_RGB_MATRIX_SOLID_SPLASH
-
-// Optional: Set the duration of the splash animation (in milliseconds)
-#define RGB_MATRIX_SOLID_SPLASH_TIME 2000 // Adjust duration as needed
-
-// Enabling CapsWord activation with both shifts
-#define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
 
 // Default debounce time
 #define DEBOUNCE 5

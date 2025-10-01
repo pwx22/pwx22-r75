@@ -30,7 +30,7 @@
         }
     },
     "dynamic_keymap": {
-        "layer_count": 4
+        "layer_count": 6
     },
     "processor": "WB32FQ95",
     "indicators": {
@@ -82,8 +82,7 @@
             "solid_reactive_wide": true,
             "solid_splash": true,
             "splash": true,
-            "typing_heatmap": true,
-            "game_mode_effect": true
+            "typing_heatmap": true
         },
         "driver": "ws2812",
         "layout": [
@@ -172,7 +171,7 @@
     "url": "",
     "usb": {
         "device_version": "0.0.1",
-        "force_nkro": true,
+        "force_nkro": false,
         "pid": "0xE484",
         "suspend_wakeup_delay": 1000,
         "vid": "0x342D"

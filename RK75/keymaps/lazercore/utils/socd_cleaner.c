@@ -46,8 +46,20 @@ bool process_socd_cleaner(uint16_t keycode, keyrecord_t* record,
   const uint8_t i = (keycode == state->keys[1]);
   const uint8_t opposing = i ^ 1;  // Index of the opposing key.
 
+  uint8_t previous_first = state->first;
+
   // Track which keys are physically held (vs. keys in the report).
   state->held[i] = record->event.pressed;
+
+  if (record->event.pressed && !state->held[opposing]) {
+    state->first = i;
+  } else if (!record->event.pressed && previous_first == i) {
+    state->first = state->held[opposing] ? opposing : SOCD_FIRST_NONE;
+  }
+
+  if (!state->held[0] && !state->held[1]) {
+    state->first = SOCD_FIRST_NONE;
+  }
 
   // Perform SOCD resolution for events where the opposing key is held.
   if (state->held[opposing]) {
@@ -76,6 +88,28 @@ bool process_socd_cleaner(uint16_t keycode, keyrecord_t* record,
           update_key(state->keys[opposing], !state->held[i]);
         }
         break;
+
+      case SOCD_CLEANER_FIRST: {
+        if (!state->held[opposing]) {
+          break;
+        }
+        uint8_t winner = previous_first;
+        if (winner == SOCD_FIRST_NONE) {
+          winner = i;
+        }
+        if (record->event.pressed) {
+          if (winner != i) {
+            return false;
+          }
+        } else {
+          if (winner != i) {
+            return false;
+          }
+          update_key(state->keys[opposing], true);
+          send_keyboard_report();
+        }
+        break;
+      }
     }
   }
   return true;  // Continue default handling to press/release current key.

@@ -113,6 +113,8 @@ enum socd_cleaner_resolution {
   SOCD_CLEANER_0_WINS,
   // Key 1 always wins.
   SOCD_CLEANER_1_WINS,
+  // First key pressed wins until released.
+  SOCD_CLEANER_FIRST,
   // Sentinel to count the number of resolution strategies.
   SOCD_CLEANER_NUM_RESOLUTIONS,
 };
@@ -121,7 +123,10 @@ typedef struct {
   uint8_t keys[2];  // Basic keycodes for the two opposing keys.
   uint8_t resolution;  // Resolution strategy.
   bool held[2];  // Tracks which keys are physically held.
+  uint8_t first; // Tracks which key was pressed first when using SOCD_CLEANER_FIRST.
 } socd_cleaner_t;
+
+#define SOCD_FIRST_NONE 0xFF
 
 /**
  * Handler function for SOCD cleaner.
