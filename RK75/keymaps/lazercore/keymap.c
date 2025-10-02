@@ -61,6 +61,10 @@ static void force_usb_reenumeration(void) {
     tud_disconnect();
     wait_ms(200);
     tud_connect();
+#elif defined(USB_DRIVER_CHIBIOS)
+    usbDisconnectBus(&USBD1);
+    wait_ms(200);
+    usbConnectBus(&USBD1);
 #else
     /* Unsupported USB stack – safely do nothing. */
 #endif
