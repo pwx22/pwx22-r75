@@ -14,6 +14,10 @@
 #if defined(VIA_ENABLE) && defined(ENCODER_BUTTONS_ENABLE)
 #    include "dynamic_keymap.h"
 #endif
+#if defined(CHIBIOS)
+void usb_disable(void);
+void usb_enable(void);
+#endif
 
 void clear_keyboard_but_mods(void);
 #if defined(NKRO_ENABLE)
@@ -49,6 +53,14 @@ static void restore_encoder_button_defaults_if_needed(void);
 #if defined(VIA_ENABLE) && defined(ENCODER_BUTTONS_ENABLE)
 static uint16_t encoder_button_keycode_for_active_layer(uint8_t encoder, uint8_t button);
 #endif
+
+static void force_usb_reenumeration(void) {
+#if defined(CHIBIOS)
+    usb_disable();
+    wait_ms(200);
+    usb_enable();
+#endif
+}
 
 socd_cleaner_t socd_v = {{KC_W, KC_S}, SOCD_CLEANER_LAST, {false, false}, SOCD_FIRST_NONE};
 socd_cleaner_t socd_h = {{KC_A, KC_D}, SOCD_CLEANER_LAST, {false, false}, SOCD_FIRST_NONE};
@@ -213,6 +225,7 @@ static uint32_t eeprom_deferred_callback(uint32_t trigger_time, void *context) {
     night_config_set_defaults();
     restore_encoder_button_defaults_if_needed();
     eeprom_token = INVALID_DEFERRED_TOKEN;
+    force_usb_reenumeration();
     return 0;
 }
 
