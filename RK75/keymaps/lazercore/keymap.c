@@ -55,15 +55,15 @@ static void restore_encoder_button_defaults_if_needed(void);
 static void force_usb_reenumeration(void) {
 #if defined(USB_DRIVER_LUFA)
     USB_Detach();
-    wait_ms(200);
+    wait_ms(300);
     USB_Attach();
 #elif defined(USB_DRIVER_TINYUSB)
     tud_disconnect();
-    wait_ms(200);
+    wait_ms(300);
     tud_connect();
 #elif defined(USB_DRIVER_CHIBIOS)
     usbDisconnectBus(&USBD1);
-    wait_ms(200);
+    wait_ms(300);
     usbConnectBus(&USBD1);
 #else
     /* Unsupported USB stack – safely do nothing. */
