@@ -9,54 +9,38 @@
 ### VIA Enabled  
 Easily remap keys, configure layers, and customize RGB lighting using the [Via Configurator](https://usevia.app/).  
 
-### CapsWord  
-Type a word in all caps by pressing `Left Shift + Right Shift`.  
+### Sentence Case
+Toggle sentence case mode with `Fn + Caps Lock`. The feature is off by default and capitalizes the first letter of each sentence when enabled.
 
-### Sentence Case  
-Toggle sentence case mode with `Fn + Caps Lock`. Automatically capitalizes the first letter of each sentence.  
+### Win Lock
+Toggle the Windows key lock with `Fn + Win`. When enabled, both operating-system keys are blocked and the Win key glows red on the base layer.
 
-### Autocorrect  
-Toggle Autocorrect with `Fn + F3`.  
-- Corrects common typos using a dictionary created by [@gargum](https://github.com/gargum).  
+### SOCD Mode Cycle
+Hold `Fn`, keep `Right Shift` pressed to access the SOCD layer, then press `S` to cycle simultaneous-opposite cardinal direction (SOCD) handling between **Last Input Wins**, **Neutral**, and **First Input Wins**. Each selection triggers dedicated function-row lighting feedback so you always know which mode is active.
 
-### Game Mode  
-Activate Game Mode with `Fn + Right Shift + G`. Features include:  
-- **SOCD Filtering**: Prioritizes the latest input between two conflicting keys for faster directional changes.  
-- **Custom RGB Matrix**: Highlights WASD keys with adjustable RGB modes.  
-- **Windows Key Lock**: Blocks the `LGUI` (Windows) key to prevent interruptions.  
+### NKRO Toggle
+Hold `Fn`, keep `Right Shift` pressed, then tap `N` to toggle between the default **6KRO** and **NKRO** reporting. Lighting feedback confirms the currently selected mode.
 
-### Audio Visualizer Mode (Layer 3)  
-Activate with `Fn + Right Shift + Volume Knob`.  
-- Real-time, reactive audio visualization powered by [Lazersync](https://github.com/pk-vishnu/lazersync).  
+### Layer Lighting
+- **Layers 0–2**: Solid orange (RGB 255, 95, 64) by default—fully adjustable in VIA. Win Lock (red) and Sentence Case (green) status are indicated on the Windows and Caps Lock keys.
+- **Layer 3 (Fn)**: All keys are dark except **Enter**, **Right Shift**, **Caps Lock**, and **Win**, which illuminate according to their functions and toggle states.
+- **Layer 4 (SOCD/NKRO)**: Highlights the SOCD (`S`) and NKRO (`N`) controls in purple and orange respectively, along with numeric indicators for the active mode.
+- **Layer 5 (System)**: Emphasizes the DFU (`Esc`) and EEPROM Clear (`E`) controls in red.
 
-### Type Alchemy  
-Toggle Type Alchemy with `Fn + F1`.  
-- Automatically convert words into symbols using a customizable map. For example, typing "infinity" converts to `∞`.  
-- Switch between Unicode modes for Windows ([WinCompose](https://github.com/samhocevar/wincompose) required), Linux, and macOS with `Fn + F2`.  
-- Use the public API in `type_alchemy.h` to expand functionality.  
+### Night Mode
+- Tap `PgDn` on the base layer to toggle layers 0–2 between the VIA-selected color/brightness and the stored **Night** preset.
+- Hold `Fn` (momentary layer 3) and press `PgDn` to capture the current VIA hue/brightness as the new **Night** preset (saved to EEPROM). The firmware ships with #ff985a at 10 % brightness as the default Night profile.
 
-### Light Indicators  
-Visual indicators show the currently active layer and available function keys.  
+Layers 1 and 2 ship as clones of the base typing layer so you have two blank canvases ready for VIA custom layouts.
 
-### Knob Controls  
-- **Layer 0**: Volume control  
-- **Layer 1**: Screen brightness  
-- **Layer 2**: Media fast-forward/rewind  
+### Knob Controls
+- **Layers 0–2**: Volume control (counter-clockwise = volume down, clockwise = volume up, press = mute)
 
-### DFU Mode  
-Enter bootloader mode for flashing firmware by pressing `Fn + Shift + Esc`.  
+### DFU Mode
+Hold `Fn`, keep `Enter` pressed (momentary Layer 5), then tap `Esc`. The whole board flashes red for 0.5 s before entering the bootloader.
 
-### Clear EEPROM  
-Clear the keyboard's EEPROM memory with `Fn + Space`.  
-
----
-
-## RGB Controls  
-
-- **Brightness**: Adjust with `Fn + Up/Down Arrows`.  
-- **Effect Speed**: Adjust with `Fn + Left/Right Arrows`.  
-- **RGB Mode**: Cycle modes with `Fn + \` (Backslash).  
-- **Further Customization**: Use the [Via Configurator](https://usevia.app/).  
+### Clear EEPROM
+Hold `Fn`, keep `Enter` pressed, then tap `E`. The keys `{3, 4, R, F, C, X, S, W}` flash red for 0.5 s before the EEPROM is cleared and the board resets.
 
 ---
 
@@ -78,8 +62,8 @@ Clear the keyboard's EEPROM memory with `Fn + Space`.
    - Clone this repository or download the `.hex` file from the `Compiled` folder.  
 
 2. **Flash the Firmware**:  
-   - Enter DFU mode by pressing `Fn + Shift + Esc`.  
-   - Alternatively, press the `ESC` key while plugging in the USB cable, or use the reset button located under the space bar.  
+    - Enter DFU mode by holding `Fn`, keeping `Enter` pressed, then tapping `Esc`.
+    - Alternatively, press the `ESC` key while plugging in the USB cable, or use the reset button located under the space bar.
    - Use **QMK Toolbox** to flash the `lazercore.hex` file to your keyboard.  
    
 ---
