@@ -24,6 +24,7 @@
 */
 #elif defined(USB_DRIVER_WB32)
 #    include "usb_main.h"
+#    include "hal.h"
 extern const USBConfig usbcfg;
 #endif
 #if defined(VIA_ENABLE) && defined(ENCODER_BUTTONS_ENABLE)
@@ -79,11 +80,15 @@ static void force_usb_reenumeration(void) {
     usbStart(&USBD1, &usbcfg);  /* wystartuj z konfiguracją płytki */
     usbConnectBus(&USBD1);      /* podnieś pull-up */
 #elif defined(USB_DRIVER_WB32)
-    /* Port WB32 używa warstwy o bardzo zbliżonym API do ChibiOS. */
-    usbDisconnectBus(&USBD1);
-    wait_ms(300);
+    /* Wymuś re-enumerację przez ręczne opuszczenie i podniesienie linii D+. */
     usbStop(&USBD1);
     wait_ms(10);
+
+    palSetPadMode(GPIOA, 12, PAL_MODE_OUTPUT_PUSHPULL);
+    palClearPad(GPIOA, 12);
+    wait_ms(300);
+
+    palSetPadMode(GPIOA, 12, PAL_MODE_ALTERNATE(14));
     usbStart(&USBD1, &usbcfg);
     usbConnectBus(&USBD1);
 #else
