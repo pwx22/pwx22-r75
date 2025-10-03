@@ -1,3 +1,7 @@
+### WORK IN PROGRESS
+
+
+
 ![lazercore1](https://github.com/user-attachments/assets/e7b6cfb6-69a9-4dbc-b367-30854e5d35ae)
 > [!CAUTION]
 > This is a custom firmware that could break your keyboard.
