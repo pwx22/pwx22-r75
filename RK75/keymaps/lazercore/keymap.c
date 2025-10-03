@@ -16,6 +16,12 @@
 #    include "usb.h"
 #elif defined(USB_DRIVER_TINYUSB)
 #    include "tusb.h"
+#elif defined(USB_DRIVER_CHIBIOS)
+#    include "usb_main.h"
+/* jeśli nagłówki nie eksportują symbolu, odkomentuj:
+// extern USBDriver USBD1;
+// extern const USBConfig usbcfg;
+*/
 #endif
 #if defined(VIA_ENABLE) && defined(ENCODER_BUTTONS_ENABLE)
 #    include "dynamic_keymap.h"
@@ -62,9 +68,13 @@ static void force_usb_reenumeration(void) {
     wait_ms(300);
     tud_connect();
 #elif defined(USB_DRIVER_CHIBIOS)
-    usbDisconnectBus(&USBD1);
-    wait_ms(300);
-    usbConnectBus(&USBD1);
+    /* twardsza re-enumeracja na ChibiOS/WB32 */
+    usbDisconnectBus(&USBD1);   /* opuść pull-up */
+    wait_ms(300);               /* daj hostowi to zauważyć */
+    usbStop(&USBD1);            /* zatrzymaj sterownik USB */
+    wait_ms(10);                /* krótka przerwa na ustabilizowanie */
+    usbStart(&USBD1, &usbcfg);  /* wystartuj z konfiguracją płytki */
+    usbConnectBus(&USBD1);      /* podnieś pull-up */
 #else
     /* Unsupported USB stack – safely do nothing. */
 #endif
