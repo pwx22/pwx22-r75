@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #pragma once
 
-// #define DYNAMIC_KEYMAP_LAYER_COUNT 6 // 9 -- defaults to 4, now defined in keyboard.json
-// #define WEAR_LEVELING_LOGICAL_SIZE 2048 // defined below
+// #define DYNAMIC_KEYMAP_LAYER_COUNT 6 // matches keyboard.json layer_count value
+// #define WEAR_LEVELING_LOGICAL_SIZE 2048 // keyboard.json backing_size is 4096, so logical size is half
 // #define WEAR_LEVELING_BACKING_SIZE 4096 // defined in keyboard.json
 
-// #define LED_CAPS_LOCK_PIN B0 // defined in keyboard.json
+// #define LED_CAPS_LOCK_PIN C4 // defined in keyboard.json
 #define LED_WIN_LOCK_PIN B9
 #define LED_MAC_PIN B8
 
