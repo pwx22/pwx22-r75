@@ -2,7 +2,7 @@
 
 
 
-![lazercore1](https://github.com/user-attachments/assets/e7b6cfb6-69a9-4dbc-b367-30854e5d35ae)
+![pwx1](https://github.com/user-attachments/assets/e7b6cfb6-69a9-4dbc-b367-30854e5d35ae)
 > [!CAUTION]
 > This is a custom firmware that could break your keyboard.
 >
@@ -68,7 +68,7 @@ Hold `Fn`, keep `Enter` pressed, then tap `E`. The keys `{3, 4, R, F, C, X, S, W
 2. **Flash the Firmware**:  
     - Enter DFU mode by holding `Fn`, keeping `Enter` pressed, then tapping `Esc`.
     - Alternatively, press the `ESC` key while plugging in the USB cable, or use the reset button located under the space bar.
-   - Use **QMK Toolbox** to flash the `lazercore.hex` file to your keyboard.  
+   - Use **QMK Toolbox** to flash the `pwx.hex` file to your keyboard.
    
 ---
 
@@ -76,7 +76,7 @@ Hold `Fn`, keep `Enter` pressed, then tap `E`. The keys `{3, 4, R, F, C, X, S, W
 
 1. Copy the `RK75` folder to the `keyboards` folder in your QMK firmware environment.  
 2. Run the following command to compile the firmware:  
-     ``` qmk compile -kb RK75 -km lazercore ``` (or) ```make RK75:lazercore -j``` 
+     ``` qmk compile -kb RK75 -km pwx ``` (or) ```make RK75:pwx -j```
 
 ## Contributing  
 

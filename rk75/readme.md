@@ -1,4 +1,4 @@
-# RK75 Lazercore Keymap
+# RK75 PWX Keymap
 
 -   Keyboard Maintainer: [sdk66](https://github.com/sdk66)
 -   Hardware Supported: RK75
@@ -6,11 +6,11 @@
 
 Build example for this keyboard (after setting up your build environment):
 
-    qmk compile -kb rk75 -km lazercore
+    qmk compile -kb rk75 -km pwx
 
 Flashing example for this keyboard:
 
-    qmk flash -kb rk75 -km lazercore
+    qmk flash -kb rk75 -km pwx
 
 To reset the board into bootloader mode, do one of the following:
 

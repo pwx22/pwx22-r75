@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include QMK_KEYBOARD_H
 #include "rgb_matrix.h"
-#include "keymaps/lazercore/utils/indicators.h"
+#include "keymaps/pwx/utils/indicators.h"
 #define LED_ENABLE_PIN A5
 
 void keyboard_pre_init_kb(void) {
