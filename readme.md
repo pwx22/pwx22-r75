@@ -2,11 +2,13 @@
 
 
 
-![pwx1](https://github.com/user-attachments/assets/e7b6cfb6-69a9-4dbc-b367-30854e5d35ae)
 > [!CAUTION]
 > This is a custom firmware that could break your keyboard.
 >
 > 🛑 **Use at your own risk!** 🛑
+
+> [!NOTE]
+>  This repo was made mostly by GPT CODEX AGENT - i was just prompting one!
 
 ## Features  
 
@@ -85,6 +87,4 @@ Contributions, bug reports, and feature requests are welcome!
 ---
 
 ## Acknowledgments  
-- Special thanks to [@sdk66](https://github.com/sdk66), [@snakkarike](https://github.com/snakkarike), [@irfanjmdn](https://github.com/irfanjmdn), and [@iamdanielv](https://github.com/iamdanielv) for their contributions to RK keyboards, providing a solid foundation for this project.
-- Grateful to the [QMK Community](https://qmk.fm/) for their extensive documentation and support.  
----  
+- Special thanks to [@pk-vishnu](https://github.com/pk-vishnu), for helping me out! make sure to check out his firmware [lazercore](https://github.com/pk-vishnu/lazercore)
