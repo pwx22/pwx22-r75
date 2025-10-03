@@ -11,22 +11,6 @@
 #include "utils/socd_cleaner.h"
 #include "rgb_matrix.h"
 #include "progmem.h"
-#include "wait.h"
-#if defined(USB_DRIVER_LUFA)
-#    include "usb.h"
-#elif defined(USB_DRIVER_TINYUSB)
-#    include "tusb.h"
-#elif defined(USB_DRIVER_CHIBIOS)
-#    include "usb_main.h"
-/* jeśli nagłówki nie eksportują symbolu, odkomentuj:
-// extern USBDriver USBD1;
-// extern const USBConfig usbcfg;
-*/
-#elif defined(USB_DRIVER_WB32)
-#    include "usb_main.h"
-#    include "hal.h"
-extern const USBConfig usbcfg;
-#endif
 #if defined(VIA_ENABLE) && defined(ENCODER_BUTTONS_ENABLE)
 #    include "dynamic_keymap.h"
 #endif
@@ -61,40 +45,6 @@ static deferred_token dfu_token = INVALID_DEFERRED_TOKEN;
 static deferred_token eeprom_token = INVALID_DEFERRED_TOKEN;
 
 static void restore_encoder_button_defaults_if_needed(void);
-
-static void force_usb_reenumeration(void) {
-#if defined(USB_DRIVER_LUFA)
-    USB_Detach();
-    wait_ms(300);
-    USB_Attach();
-#elif defined(USB_DRIVER_TINYUSB)
-    tud_disconnect();
-    wait_ms(300);
-    tud_connect();
-#elif defined(USB_DRIVER_CHIBIOS)
-    /* twardsza re-enumeracja na ChibiOS */
-    usbDisconnectBus(&USBD1);   /* opuść pull-up */
-    wait_ms(300);               /* daj hostowi to zauważyć */
-    usbStop(&USBD1);            /* zatrzymaj sterownik USB */
-    wait_ms(10);                /* krótka przerwa na ustabilizowanie */
-    usbStart(&USBD1, &usbcfg);  /* wystartuj z konfiguracją płytki */
-    usbConnectBus(&USBD1);      /* podnieś pull-up */
-#elif defined(USB_DRIVER_WB32)
-    /* Wymuś re-enumerację przez ręczne opuszczenie i podniesienie linii D+. */
-    usbStop(&USBD1);
-    wait_ms(10);
-
-    palSetPadMode(GPIOA, 12, PAL_MODE_OUTPUT_PUSHPULL);
-    palClearPad(GPIOA, 12);
-    wait_ms(300);
-
-    palSetPadMode(GPIOA, 12, PAL_MODE_ALTERNATE(14));
-    usbStart(&USBD1, &usbcfg);
-    usbConnectBus(&USBD1);
-#else
-    /* Unsupported USB stack – safely do nothing. */
-#endif
-}
 
 socd_cleaner_t socd_v = {{KC_W, KC_S}, SOCD_CLEANER_LAST, {false, false}, SOCD_FIRST_NONE};
 socd_cleaner_t socd_h = {{KC_A, KC_D}, SOCD_CLEANER_LAST, {false, false}, SOCD_FIRST_NONE};
@@ -241,7 +191,7 @@ static uint32_t eeprom_deferred_callback(uint32_t trigger_time, void *context) {
     night_config_set_defaults();
     restore_encoder_button_defaults_if_needed();
     eeprom_token = INVALID_DEFERRED_TOKEN;
-    force_usb_reenumeration();
+    soft_reset_keyboard();
     return 0;
 }
 
